@@ -138,8 +138,10 @@ public class ActivityGame extends Activity{
 		    switch (position){
 		    	case 58:
 		    		i.setImageResource(R.drawable.sheep);
+        			break;
 		    	default:
 		    		i.setImageResource(R.drawable.water);
+        			break;
 		    }
 		    
 	        i.setScaleType(ImageView.ScaleType.FIT_XY);
