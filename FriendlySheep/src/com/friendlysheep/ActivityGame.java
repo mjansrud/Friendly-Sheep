@@ -75,8 +75,9 @@ public class ActivityGame extends Activity{
 			        	
 			        	if(position<=26) i = 0;
 			        	else if(position>=63) i = 3;
-			        	else if (position%9 >= 0 && position%10 <= 7) i = 1;
-			        	//else if (position%8 >= 3 && position%9 <= 8) i = 2;
+			        	else if (position == 27 || 35 < position && position < 38 || 44 < position && position < 48 || 53 < position && position < 58) i = 1;
+			        	else if (position == 35 || 42 < position && position < 45 || 50 < position && position < 54 || 58 < position && position < 63) i = 2;
+			        	else i=0;
 			        	
 			        	switch (i){ 
 				        	case 0:
