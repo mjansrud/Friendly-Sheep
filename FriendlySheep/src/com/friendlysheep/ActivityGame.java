@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.MeasureSpec;
@@ -133,7 +134,14 @@ public class ActivityGame extends Activity{
 	    	//getLayoutInflator().inflate(R.layout...)
 		    ImageView i = new ImageView(activity);
 
-	        i.setImageResource(R.drawable.water);
+		    Log.i("YO", "" + position);
+		    switch (position){
+		    	case 58:
+		    		i.setImageResource(R.drawable.sheep);
+		    	default:
+		    		i.setImageResource(R.drawable.water);
+		    }
+		    
 	        i.setScaleType(ImageView.ScaleType.FIT_XY);
 
 	        int width = parentWidth/columns ;
@@ -146,7 +154,6 @@ public class ActivityGame extends Activity{
 	    public final int getCount() {
 	        return rows * columns;
 	    }
-	
 	
 	    public final long getItemId(int position) {
 	        return position;
