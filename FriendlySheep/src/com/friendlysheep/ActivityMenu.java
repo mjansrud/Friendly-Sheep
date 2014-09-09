@@ -30,8 +30,11 @@ public class ActivityMenu extends Activity{
                  // Perform action on click   
 
             	 // Send to ActivityGame
-                 Intent changeIntent = new Intent(ActivityMenu.this, ActivityGame.class);
-                 ActivityMenu.this.startActivity(changeIntent);
+         	  	Intent intent = new Intent(ActivityMenu.this, ActivityGame.class);
+        	  	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        	  	ActivityMenu.this.startActivity(intent);
+        	  	ActivityMenu.this.overridePendingTransition(R.anim.animate_in_left, R.anim.animate_out_left );
+
              }
          });
 		 

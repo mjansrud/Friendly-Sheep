@@ -1,12 +1,27 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" 
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:background="@drawable/sheep_menu"
+    >
 
-    <Button
-        android:id="@+id/b_play"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Play" />
     
-</LinearLayout>
+   <ImageButton
+       android:id="@+id/logo"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_centerInParent="true"
+       android:background="@drawable/logo_text" />
+   
+   <Button
+        android:id="@+id/b_play"
+        android:layout_width="wrap_content" 
+        android:layout_height="wrap_content"
+       	android:layout_below="@+id/logo"
+        android:layout_centerHorizontal="true"
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp"
+        android:text="Play" />
+       
+</RelativeLayout>

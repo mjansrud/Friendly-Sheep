@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -32,7 +33,7 @@ public class ActivityGame extends Activity{
 	private int parentWidth;
 	private int parentHeight;
 	private GridView grid;
-	
+	private AlertDialog dialog;
 	private Activity activity;
 	
 	@Override
@@ -42,6 +43,26 @@ public class ActivityGame extends Activity{
 	
 		activity = this;
 
+		dialog = new AlertDialog.Builder(activity)
+        .setTitle("Get ready")
+        .setMessage("3")
+        .setIcon(android.R.drawable.ic_dialog_info)
+        .show();
+		
+		new CountDownTimer(3000, 1000) {
+
+			 public void onTick(long millisUntilFinished) {
+				 dialog.setMessage("" + (millisUntilFinished / 1000));
+			  //here you can have your logic to set text to edittext 
+			 }
+ 
+			 public void onFinish() {
+				 dialog.setMessage("0"); 
+				 dialog.hide();
+			 }
+		}
+	    .start();		
+		
 		setLayout();
 	}
 	
@@ -141,7 +162,7 @@ public class ActivityGame extends Activity{
 		    		i.setImageResource(R.drawable.sheep);
         			break;
 		    	default:
-		    		i.setImageResource(R.drawable.water);
+		    		i.setImageResource(R.drawable.transparent);
         			break;
 		    }
 		    
