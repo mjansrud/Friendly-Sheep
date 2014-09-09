@@ -69,9 +69,34 @@ public class ActivityGame extends Activity{
 			        @Override
 			        public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
 
+			        	String button;
+			        	int i = 0;
+			        	
+			        	if(position< 36) i = 0;
+			        	if(position>=36) i = 3;
+			        	
+			        	switch (i){ 
+				        	case 0:
+				        		button = "Top";
+				        		break;
+				        	case 1:
+				        		button = "Left";
+				        		break;
+				        	case 2:
+				        		button = "Right"; 
+				        		break;
+				        	case 3:
+				        		button = "Bottom";
+				        		break;
+			        		default:
+				        		button = "Error";
+			        			break;
+			        	}
+			        	
+			        	
 			        	new AlertDialog.Builder(activity)
 			            .setTitle("YO")
-			            .setMessage("You are gay " + position)
+			            .setMessage("You are gay " + position + ", button: " + button)
 			            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 			                public void onClick(DialogInterface dialog, int which) { 
 			                    // continue with delete
