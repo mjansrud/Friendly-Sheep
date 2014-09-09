@@ -2,10 +2,18 @@ package com.friendlysheep;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -18,10 +26,12 @@ public class ActivityGame extends Activity{
 
 	//Defining variables
 	private boolean alive;
-	private Button b_left; 
-	private Button b_right;
-	private Button b_top;
-	private Button b_bottom;
+	private int rows = 9;
+	private int columns = 9;
+	private int parentWidth;
+	private int parentHeight;
+	private GridView grid;
+	
 	private Activity activity;
 	
 	@Override
@@ -30,32 +40,52 @@ public class ActivityGame extends Activity{
 		setContentView(R.layout.activity_game);
 	
 		activity = this;
-		
+
 		setLayout();
 	}
 	
 	private void setLayout(){
 		
-		GridView grid = (GridView) findViewById(R.id.myGrid);
-	    grid.setAdapter(new customAdapter());
+		grid = (GridView) findViewById(R.id.myGrid);
+		grid.post(new Runnable() { 
+		public void run(){
+			
+		        Rect rect = new Rect();
+		        Window win = getWindow();
+		        win.getDecorView().getWindowVisibleDisplayFrame(rect);
+		        int statusHeight = rect.top;
+		        int contentViewTop = win.findViewById(Window.ID_ANDROID_CONTENT).getTop();
+		        int titleHeight = contentViewTop - statusHeight;
+		        
+		        Display display = getWindowManager().getDefaultDisplay();
+		        Point size = new Point();
+		        display.getSize(size);
 
-	    grid.setOnItemClickListener(new OnItemClickListener() {
-	        @Override
-	        public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
+				parentWidth = size.x;
+				parentHeight = size.y - statusHeight - titleHeight;
+				
+				grid.setAdapter(new customAdapter());
+			    grid.setOnItemClickListener(new OnItemClickListener() {
+			        @Override
+			        public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
 
-	        	new AlertDialog.Builder(activity)
-	            .setTitle("YO")
-	            .setMessage("You are gay" + position)
-	            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-	                public void onClick(DialogInterface dialog, int which) { 
-	                    // continue with delete
-	                }
-	             })
-	            .setIcon(android.R.drawable.ic_dialog_alert)
-	             .show();
-	        		
-	        }
-	    });
+			        	new AlertDialog.Builder(activity)
+			            .setTitle("YO")
+			            .setMessage("You are gay " + position)
+			            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+			                public void onClick(DialogInterface dialog, int which) { 
+			                    // continue with delete
+			                }
+			             })
+			            .setIcon(android.R.drawable.ic_dialog_alert)
+			             .show();
+			        		
+			        }
+			    });
+		}
+		});
+		
+
 	}
 	
 	
@@ -69,24 +99,27 @@ public class ActivityGame extends Activity{
 		}
 		
 	}
-	
 
-	public class customAdapter extends BaseAdapter {
-	
+
+	public class customAdapter extends BaseAdapter{
+		
 	    public View getView(int position, View convertView, ViewGroup parent) {
 	    	//create a basic imageview here or inflate a complex layout with
 	    	//getLayoutInflator().inflate(R.layout...)
 		    ImageView i = new ImageView(activity);
-	
+
 	        i.setImageResource(R.drawable.water);
-	        i.setScaleType(ImageView.ScaleType.FIT_CENTER);
-	        final int w = (int) (36 * getResources().getDisplayMetrics().density + 0.5f);
-	        i.setLayoutParams(new GridView.LayoutParams(w * 2, w * 2));
+	        i.setScaleType(ImageView.ScaleType.FIT_XY);
+
+	        int width = parentWidth/columns ;
+	        int height= parentHeight/rows ;
+	        
+	        i.setLayoutParams(new GridView.LayoutParams(width, height));
 	        return i;
 	    }
 	
 	    public final int getCount() {
-	        return 9;
+	        return rows * columns;
 	    }
 	
 	
@@ -95,11 +128,10 @@ public class ActivityGame extends Activity{
 	    }
 
 		@Override
-		public Object getItem(int arg0) {
+		public Object getItem(int position) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 	}
-
 	
 }
