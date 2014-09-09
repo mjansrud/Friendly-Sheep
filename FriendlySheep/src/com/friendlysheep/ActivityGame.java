@@ -74,7 +74,8 @@ public class ActivityGame extends Activity{
 			        	int i = 0;
 			        	
 			        	if(position<=26) i = 0;
-			        	if(position>=63) i = 3;
+			        	else if(position>=63) i = 3;
+			        	else if (position%10 == 7) i = 1;
 			        	
 			        	switch (i){ 
 				        	case 0:
@@ -115,14 +116,10 @@ public class ActivityGame extends Activity{
 	}
 	
 	private void playGame(){
-		
 		while(alive){
 			
 			
-			
-			
 		}
-		
 	}
 
 	public class customAdapter extends BaseAdapter{
