@@ -74,6 +74,7 @@ public class ActivityGame extends Activity{
 			        	int i = 0;
 			        	
 			        	if(position<=26) i = 0;
+			        	else if(position == 58) i = 4;
 			        	else if(position>=63) i = 3;
 			        	else if (position == 27 || 35 < position && position < 38 || 44 < position && position < 48 || 53 < position && position < 58) i = 1;
 			        	else if (position == 35 || 42 < position && position < 45 || 50 < position && position < 54 || 58 < position && position < 63) i = 2;
@@ -91,6 +92,9 @@ public class ActivityGame extends Activity{
 				        		break;
 				        	case 3:
 				        		button = "Bottom";
+				        		break;
+				        	case 4:
+				        		button = "BAAEE";
 				        		break;
 			        		default:
 				        		button = "Error";
