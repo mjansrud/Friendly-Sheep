@@ -162,7 +162,7 @@ public class ActivityGame extends Activity{
 		    		i.setImageResource(R.drawable.sheep);
         			break;
 		    	default:
-		    		i.setImageResource(R.drawable.transparent);
+		    		i.setImageResource(R.buttons.transparent_view);
         			break;
 		    }
 		    
