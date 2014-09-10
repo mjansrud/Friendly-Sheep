@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Path.FillType;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -12,16 +13,21 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
  
 
 public class ActivityGame extends Activity{
@@ -35,6 +41,7 @@ public class ActivityGame extends Activity{
 	private GridView grid;
 	private AlertDialog dialog;
 	private Activity activity;
+	private TranslateAnimation moveLeftToRight;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +66,7 @@ public class ActivityGame extends Activity{
 			 public void onFinish() {
 				 dialog.setMessage("0"); 
 				 dialog.hide();
+				 setAnimation();
 			 }
 		}
 	    .start();		
@@ -68,6 +76,7 @@ public class ActivityGame extends Activity{
 	
 	private void setLayout(){
 		
+	    //Puts a grid on top
 		grid = (GridView) findViewById(R.id.myGrid);
 		grid.post(new Runnable() { 
 		public void run(){
@@ -162,7 +171,7 @@ public class ActivityGame extends Activity{
 		    	i.setImageResource(R.drawable.sheep);		    	
 		    }
 		    else if (position <= 62){
-		    	i.setBackgroundResource(R.drawable.background_sky);		    	
+		    	i.setBackgroundResource(R.drawable.transparent_view);		    	
 		    }
 		    else{
 	    		i.setBackgroundResource(R.drawable.background_ground);	
@@ -190,6 +199,28 @@ public class ActivityGame extends Activity{
 			// TODO Auto-generated method stub
 			return null;
 		}
+	}
+	
+	//animation
+	public void setAnimation(){
+
+		
+	    final TextView tv = new TextView(this);
+	    tv.setText("Animation");
+
+	    moveLeftToRight = new TranslateAnimation(0, 200, 0, 0);
+	    moveLeftToRight.setDuration(1000);
+	    moveLeftToRight.setFillAfter(true);
+
+        tv.startAnimation(moveLeftToRight);
+	   		
+	}
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+	    int x = (int)event.getX();
+	    int y = (int)event.getY();
+	    Log.i(Integer.toString(x),Integer.toString(y));
+	return false;
 	}
 	
 }
