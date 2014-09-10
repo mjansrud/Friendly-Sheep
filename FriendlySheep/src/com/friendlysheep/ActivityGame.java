@@ -157,13 +157,15 @@ public class ActivityGame extends Activity{
 		    ImageView i = new ImageView(activity);
 
 		    Log.i("YO", "" + position);
-		    switch (position){
-		    	case 58:
-		    		i.setImageResource(R.drawable.sheep);
-        			break;
-		    	default:
-		    		i.setImageResource(R.buttons.transparent_view);
-        			break;
+		    //sets backround from drawable for the views
+		    if(position == 58){
+		    	i.setImageResource(R.drawable.sheep);		    	
+		    }
+		    else if (position <= 62){
+		    	i.setBackgroundResource(R.drawable.background_sky);		    	
+		    }
+		    else{
+	    		i.setBackgroundResource(R.drawable.background_ground);	
 		    }
 		    
 	        i.setScaleType(ImageView.ScaleType.FIT_XY);
