@@ -12,6 +12,7 @@ import android.app.AlertDialog;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,12 +52,25 @@ public class ActivityGameVersiontwo extends Activity {
 			 public void onFinish() {
 				 dialog.setMessage("0"); 
 				 dialog.hide();
-				 setAnimation();
+				 gameRunning();
 			 }
 		}
 	    .start();
 		
 	}
+	
+	public void gameRunning(){
+		final Handler h = new Handler();
+		final int delay = 1000; //milliseconds
+
+		h.postDelayed(new Runnable(){
+		    public void run(){
+		        setAnimation();
+		        h.postDelayed(this, delay);
+		    }
+		}, delay);
+	}
+	
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -113,7 +127,7 @@ public class ActivityGameVersiontwo extends Activity {
 	
 	public Integer[] RandomizeAnimation(){
 		r_anim = new Random();
-		int randomHolder = r_anim.nextInt(3);
+		int randomHolder = r_anim.nextInt(4);
 		Integer[] list;
 		if(randomHolder == 0){
 			list = new Integer[] {0,400,1100,1100};
@@ -129,9 +143,6 @@ public class ActivityGameVersiontwo extends Activity {
 		}
 		return list;
 	}
-	//Method to run animation every x second
-	public void runAnimationOnRepeat(){
-		
-	}
+	
 }
 
