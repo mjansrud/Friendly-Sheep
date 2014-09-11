@@ -37,7 +37,7 @@ public class ActivityGame extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_activity_game_versiontwo);
+		setContentView(R.layout.activity_game);
 		setLayout();
 		
 		dialog = new AlertDialog.Builder(this).setTitle("Get ready").setMessage("3").setIcon(android.R.drawable.ic_dialog_info).show();
