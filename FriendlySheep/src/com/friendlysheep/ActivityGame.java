@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.media.Image;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
+import android.view.ViewTreeObserver.OnDrawListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -38,6 +41,8 @@ public class ActivityGame extends Activity  implements OnDragListener {
 	private LayoutParams lp_sheep, lp_shield;
 	private Random r_anim;
 	private Boolean alive = true;
+	private ObjectPoint objectPoint;
+	private ArrayList<ObjectPoint> objectPoints;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -145,18 +150,37 @@ public class ActivityGame extends Activity  implements OnDragListener {
 		return list;
 	}
 
+	
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
 		
 		int x = (int)event.getX();
 		int y = (int)event.getY();
+
+		Path path = new Path();
+		objectPoint = new ObjectPoint(x,y);
+		objectPoints = new ArrayList<ObjectPoint>();
+		
+		boolean first = true;
 		
 		// TODO Auto-generated method stub
 	    switch (event.getAction()) {
 	    case DragEvent.ACTION_DRAG_STARTED:
-	    	
+	    		objectPoints.clear();
+	    		objectPoints.add(objectPoint);
 	      break;
 	    case DragEvent.ACTION_DRAG_ENTERED:
+	    	
+	    	 for(ObjectPoint point : objectPoints){
+	    	        if(first){
+	    	            first = false;
+	    	            path.moveTo(point.x, point.y);
+	    	        }
+	    	        else{
+	    	            path.lineTo(point.x, point.y);
+	    	        }
+	    	  }
+	    
 	      break;
 	    case DragEvent.ACTION_DRAG_EXITED:        
 	      break;
