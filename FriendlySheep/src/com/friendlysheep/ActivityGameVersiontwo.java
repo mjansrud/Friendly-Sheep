@@ -26,11 +26,11 @@ import android.widget.TextView;
 public class ActivityGameVersiontwo extends Activity {
 	
 	private TextView tv_position;
-	private ImageView iv_sheep, iv_stone;
+	private ImageView iv_sheep, iv_stone, iv_shield;
 	private RelativeLayout rl_screen;
 	private AlertDialog dialog;
 	private TranslateAnimation ta_leftToRigth;
-	private LayoutParams params;
+	private LayoutParams lp_sheep, lp_shield;
 	private Random r_anim;
 	private Boolean alive = true;
 
@@ -79,15 +79,19 @@ public class ActivityGameVersiontwo extends Activity {
 		
 		if(x < 400){
 			tv_position.setText("LEFT");
+			setShield("LEFT");
 		}
 		else if(x > 700){
-			tv_position.setText("RIGHT");			
+			tv_position.setText("RIGHT");
+			setShield("RIGHT");
 		}
 		else if(y < 1400){
-			tv_position.setText("TOP");			
+			tv_position.setText("TOP");
+			setShield("TOP");
 		}
 		else if(y > 1500){
-			tv_position.setText("BOTTOM");			
+			tv_position.setText("BOTTOM");
+			setShield("BOTTOM");
 		}
 		Log.i(Integer.toString(x),Integer.toString(y));
 		return false;
@@ -99,10 +103,10 @@ public class ActivityGameVersiontwo extends Activity {
 		tv_position = (TextView) findViewById(R.id.tv_position);
 		
 		iv_sheep = (ImageView) findViewById(R.id.iv_sheep);
-		params = (LayoutParams) iv_sheep.getLayoutParams();
-		params.width = 100;
-		params.height = 100;
-		iv_sheep.setLayoutParams(params);
+		lp_sheep = (LayoutParams) iv_sheep.getLayoutParams();
+		lp_sheep.width = 100;
+		lp_sheep.height = 100;
+		iv_sheep.setLayoutParams(lp_sheep);
 		iv_sheep.setX(450);
 		iv_sheep.setY(1100);
 	}
@@ -111,14 +115,13 @@ public class ActivityGameVersiontwo extends Activity {
 		Integer[] coordinates = RandomizeAnimation();
 		ta_leftToRigth = new TranslateAnimation(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
 	    ta_leftToRigth.setDuration(1000);
-	    ta_leftToRigth.setFillAfter(false);
 	    
 	    iv_stone = new ImageView(this);
 	    iv_stone.setBackgroundResource(R.drawable.water);
 //	    LayoutParams params = (LayoutParams) iv_stone.getLayoutParams();
 //		params.width = 100;
 //		params.height = 100;
-		iv_stone.setLayoutParams(params);
+		iv_stone.setLayoutParams(lp_sheep);
 	    
 	    rl_screen.addView(iv_stone);
 	    
@@ -129,20 +132,46 @@ public class ActivityGameVersiontwo extends Activity {
 		r_anim = new Random();
 		int randomHolder = r_anim.nextInt(4);
 		Integer[] list;
-		if(randomHolder == 0){
+		if(randomHolder == 0){							//LEFT
 			list = new Integer[] {0,400,1100,1100};
 		}
-		else if(randomHolder == 1){
+		else if(randomHolder == 1){						//RIGHT
 			list = new Integer[] {800,500,1100,1100};
 		}
-		else if(randomHolder == 2){
+		else if(randomHolder == 2){						//TOP
 			list = new Integer[] {450,450,0,1100};
 		}
-		else{
+		else{											//BOTTOM
 			list = new Integer[] {450,450,1400,1100};
 		}
 		return list;
 	}
 	
+	public void setShield(String position){
+		iv_shield = new ImageView(this);
+		iv_shield.setBackgroundResource(R.drawable.background_ground);
+		lp_shield = new LayoutParams(10,70);
+//		iv_shield.setLayoutParams(lp_shield);
+//		
+		if(position == "LEFT"){
+			iv_shield.setX(400);
+			iv_shield.setY(1100);			
+		}
+		else if (position == "RIGHT"){
+			iv_shield.setX(600);
+			iv_shield.setY(1100);
+		}
+		else if (position == "TOP"){
+			iv_shield.setRotation(90);
+			iv_shield.setX(500);
+			iv_shield.setY(1000);
+		}
+		else if (position == "BOTTOM"){
+			iv_shield.setRotation(90);
+			iv_shield.setX(500);
+			iv_shield.setY(1200);
+		}
+		rl_screen.addView(iv_shield, lp_shield);
+	}
 }
 
