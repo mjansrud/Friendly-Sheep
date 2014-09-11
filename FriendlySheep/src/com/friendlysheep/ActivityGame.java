@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.media.Image;
@@ -31,7 +33,7 @@ import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-public class ActivityGame extends Activity  implements OnDragListener {
+public class ActivityGame extends Activity  implements OnDragListener{
 	
 	private TextView tv_position;
 	private ImageView iv_sheep, iv_stone, iv_shield;
@@ -43,6 +45,10 @@ public class ActivityGame extends Activity  implements OnDragListener {
 	private Boolean alive = true;
 	private ObjectPoint objectPoint;
 	private ArrayList<ObjectPoint> objectPoints;
+	private Canvas  canvas;
+	private Path path;
+	private Paint paint;   
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -157,40 +163,40 @@ public class ActivityGame extends Activity  implements OnDragListener {
 		int x = (int)event.getX();
 		int y = (int)event.getY();
 
-		Path path = new Path();
 		objectPoint = new ObjectPoint(x,y);
 		objectPoints = new ArrayList<ObjectPoint>();
 		
-		boolean first = true;
+		paint = new Paint();
+		paint.setAntiAlias(true);
+		paint.setDither(true);
+		paint.setColor(Color.WHITE);
+		paint.setStyle(Paint.Style.STROKE);
+		paint.setStrokeJoin(Paint.Join.ROUND);
+		paint.setStrokeCap(Paint.Cap.ROUND);
+		paint.setStrokeWidth(6);
 		
 		// TODO Auto-generated method stub
 	    switch (event.getAction()) {
 	    case DragEvent.ACTION_DRAG_STARTED:
-	    		objectPoints.clear();
-	    		objectPoints.add(objectPoint);
-	      break;
+	    	 path = new Path();
+	    	 canvas = new Canvas();
+	    	 objectPoints.clear();
+	    	 break;
 	    case DragEvent.ACTION_DRAG_ENTERED:
-	    	
-	    	 for(ObjectPoint point : objectPoints){
-	    	        if(first){
-	    	            first = false;
-	    	            path.moveTo(point.x, point.y);
-	    	        }
-	    	        else{
-	    	            path.lineTo(point.x, point.y);
-	    	        }
-	    	  }
-	    
-	      break;
+    		 path.moveTo(x, y);
+	 	     canvas.drawPath(path, paint);
+	    	 break;
 	    case DragEvent.ACTION_DRAG_EXITED:        
-	      break;
+	    	break;
 	    case DragEvent.ACTION_DROP:
-	      break;
+	    	break;
 	    case DragEvent.ACTION_DRAG_ENDED:
-		  break;
+	    	break;
 	    default:
-	      break;
+	    	break;
 	    }
 	    return true;
 	}
+	
+
 }
