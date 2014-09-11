@@ -75,33 +75,7 @@ public class ActivityGame extends Activity  implements OnDragListener {
 		    }
 		}, delay);
 	}
-	
 
-	@Override
-	public boolean onTouchEvent(MotionEvent event) {
-		int x = (int)event.getX();
-		int y = (int)event.getY();
-		
-		if(x < 400){
-			tv_position.setText("LEFT");
-			setShield("LEFT");
-		}
-		else if(x > 700){
-			tv_position.setText("RIGHT");
-			setShield("RIGHT");
-		}
-		else if(y < 1400){
-			tv_position.setText("TOP");
-			setShield("TOP");
-		}
-		else if(y > 1500){
-			tv_position.setText("BOTTOM");
-			setShield("BOTTOM");
-		}
-		Log.i(Integer.toString(x),Integer.toString(y));
-		return false;
-	}
-	
 	public void setLayout(){
 		rl_screen = (RelativeLayout) findViewById(R.id.rl_screen);
 		
@@ -170,40 +144,17 @@ public class ActivityGame extends Activity  implements OnDragListener {
 		
 		return list;
 	}
-	
-	public void setShield(String position){
-		iv_shield = new ImageView(this);
-		iv_shield.setBackgroundResource(R.drawable.background_ground);
-		lp_shield = new LayoutParams(10,70);
-//		iv_shield.setLayoutParams(lp_shield);
-//		
-		if(position == "LEFT"){
-			iv_shield.setX(400);
-			iv_shield.setY(1100);			
-		}
-		else if (position == "RIGHT"){
-			iv_shield.setX(600);
-			iv_shield.setY(1100);
-		}
-		else if (position == "TOP"){
-			iv_shield.setRotation(90);
-			iv_shield.setX(500);
-			iv_shield.setY(1000);
-		}
-		else if (position == "BOTTOM"){
-			iv_shield.setRotation(90);
-			iv_shield.setX(500);
-			iv_shield.setY(1200);
-		}
-		rl_screen.addView(iv_shield, lp_shield);
-	}
 
 	@Override
 	public boolean onDrag(View v, DragEvent event) {
 		
+		int x = (int)event.getX();
+		int y = (int)event.getY();
+		
 		// TODO Auto-generated method stub
 	    switch (event.getAction()) {
 	    case DragEvent.ACTION_DRAG_STARTED:
+	    	
 	      break;
 	    case DragEvent.ACTION_DRAG_ENTERED:
 	      break;
