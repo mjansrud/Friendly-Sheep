@@ -9,11 +9,13 @@ import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.graphics.Point;
 import android.media.Image;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -129,21 +131,40 @@ public class ActivityGame extends Activity {
 	}
 	
 	public Integer[] RandomizeAnimation(){
+		
+		Display display = getWindowManager().getDefaultDisplay();
+		Point size = new Point();
+		display.getSize(size);
+		int width = size.x;
+		int height = size.y;
+
+		int randomY = 0;
+		int randomX = 0;
+		
 		r_anim = new Random();
-		int randomHolder = r_anim.nextInt(4);
-		Integer[] list;
-		if(randomHolder == 0){							//LEFT
-			list = new Integer[] {0,400,1100,1100};
+		int randomPosition = r_anim.nextInt(4);
+		
+		switch (randomPosition){
+			case 0:
+				randomY = r_anim.nextInt(height - 0) + 0;
+				randomX = -20;
+				break;
+			case 1:
+				randomY = -20;
+				randomX = r_anim.nextInt(width - 0) + 0;
+				break;
+			case 2:
+				randomY = r_anim.nextInt(height - 0) + 0;
+				randomX = width + 20;
+				break;
+			case 3:
+				randomY = height + 20;
+				randomX = r_anim.nextInt(width - 0) + 0;
+				break;
 		}
-		else if(randomHolder == 1){						//RIGHT
-			list = new Integer[] {800,500,1100,1100};
-		}
-		else if(randomHolder == 2){						//TOP
-			list = new Integer[] {450,450,0,1100};
-		}
-		else{											//BOTTOM
-			list = new Integer[] {450,450,1400,1100};
-		}
+		
+		Integer[] list = new Integer[] {0,450,randomY,1100};
+		
 		return list;
 	}
 	
