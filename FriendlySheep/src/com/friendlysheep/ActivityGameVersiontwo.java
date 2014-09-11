@@ -3,6 +3,9 @@ package com.friendlysheep;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -28,6 +31,7 @@ public class ActivityGameVersiontwo extends Activity {
 	private TranslateAnimation ta_leftToRigth;
 	private LayoutParams params;
 	private Random r_anim;
+	private Boolean alive = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +128,10 @@ public class ActivityGameVersiontwo extends Activity {
 			list = new Integer[] {450,450,1400,1100};
 		}
 		return list;
+	}
+	//Method to run animation every x second
+	public void runAnimationOnRepeat(){
+		
 	}
 }
 
