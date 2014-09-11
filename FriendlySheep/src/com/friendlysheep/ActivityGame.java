@@ -1,62 +1,48 @@
 package com.friendlysheep;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Point;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
-import android.view.ViewTreeObserver.OnDrawListener;
+import android.view.View.OnTouchListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-public class ActivityGame extends Activity  implements OnDragListener{
+public class ActivityGame extends Activity  implements OnTouchListener{
 	
 	private TextView tv_position;
-	private ImageView iv_sheep, iv_stone, iv_shield;
+	private ImageView iv_sheep, iv_stone;
 	private RelativeLayout rl_screen;
 	private AlertDialog dialog;
 	private TranslateAnimation ta_leftToRigth;
-	private LayoutParams lp_sheep, lp_shield;
+	private LayoutParams lp_sheep;
 	private Random r_anim;
-	private Boolean alive = true;
-	private ObjectPoint objectPoint;
-	private ArrayList<ObjectPoint> objectPoints;
-	private Canvas  canvas;
-	private Path path;
-	private Paint paint;   
+	private ViewDrawPath viewDrawPath;
+	private Activity activity;
+	private ArrayList<ViewDrawPath> viewDrawPaths;
 	
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
 		setLayout();
 		
+		activity = this;
 		dialog = new AlertDialog.Builder(this).setTitle("Get ready").setMessage("3").setIcon(android.R.drawable.ic_dialog_info).show();
+		viewDrawPaths = new ArrayList<ViewDrawPath>();
 		
 		new CountDownTimer(3000, 1000) {
 
@@ -156,47 +142,16 @@ public class ActivityGame extends Activity  implements OnDragListener{
 		return list;
 	}
 
-	
 	@Override
-	public boolean onDrag(View v, DragEvent event) {
-		
-		int x = (int)event.getX();
-		int y = (int)event.getY();
-
-		objectPoint = new ObjectPoint(x,y);
-		objectPoints = new ArrayList<ObjectPoint>();
-		
-		paint = new Paint();
-		paint.setAntiAlias(true);
-		paint.setDither(true);
-		paint.setColor(Color.WHITE);
-		paint.setStyle(Paint.Style.STROKE);
-		paint.setStrokeJoin(Paint.Join.ROUND);
-		paint.setStrokeCap(Paint.Cap.ROUND);
-		paint.setStrokeWidth(6);
-		
+	public boolean onTouch(View arg0, MotionEvent arg1) {
 		// TODO Auto-generated method stub
-	    switch (event.getAction()) {
-	    case DragEvent.ACTION_DRAG_STARTED:
-	    	 path = new Path();
-	    	 canvas = new Canvas();
-	    	 objectPoints.clear();
-	    	 break;
-	    case DragEvent.ACTION_DRAG_ENTERED:
-    		 path.moveTo(x, y);
-	 	     canvas.drawPath(path, paint);
-	    	 break;
-	    case DragEvent.ACTION_DRAG_EXITED:        
-	    	break;
-	    case DragEvent.ACTION_DROP:
-	    	break;
-	    case DragEvent.ACTION_DRAG_ENDED:
-	    	break;
-	    default:
-	    	break;
-	    }
-	    return true;
+		// TODO Auto-generated method stub
+		Log.i("ActivityGame", "drag");
+		viewDrawPath = new ViewDrawPath(activity);
+		viewDrawPaths.add(viewDrawPath);
+		return false;
 	}
+	
 	
 
 }
