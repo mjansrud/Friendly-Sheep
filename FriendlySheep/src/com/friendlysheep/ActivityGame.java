@@ -16,16 +16,19 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnDragListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-public class ActivityGame extends Activity {
+public class ActivityGame extends Activity  implements OnDragListener {
 	
 	private TextView tv_position;
 	private ImageView iv_sheep, iv_stone, iv_shield;
@@ -163,7 +166,7 @@ public class ActivityGame extends Activity {
 				break;
 		}
 		
-		Integer[] list = new Integer[] {0,450,randomY,1100};
+		Integer[] list = new Integer[] {randomX,450,randomY,1100};
 		
 		return list;
 	}
@@ -194,5 +197,25 @@ public class ActivityGame extends Activity {
 		}
 		rl_screen.addView(iv_shield, lp_shield);
 	}
-}
 
+	@Override
+	public boolean onDrag(View v, DragEvent event) {
+		
+		// TODO Auto-generated method stub
+	    switch (event.getAction()) {
+	    case DragEvent.ACTION_DRAG_STARTED:
+	      break;
+	    case DragEvent.ACTION_DRAG_ENTERED:
+	      break;
+	    case DragEvent.ACTION_DRAG_EXITED:        
+	      break;
+	    case DragEvent.ACTION_DROP:
+	      break;
+	    case DragEvent.ACTION_DRAG_ENDED:
+		  break;
+	    default:
+	      break;
+	    }
+	    return true;
+	}
+}
