@@ -1,60 +1,46 @@
 package com.friendlysheep;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Path.FillType;
-import android.graphics.Point;
-import android.graphics.Rect;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
+import android.os.Handler;
 import android.util.Log;
-import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
-import android.view.Window;
 import android.view.animation.TranslateAnimation;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
- 
 
-public class ActivityGame extends Activity{
-
-	//Defining variables
-	private boolean alive;
-	private int rows = 9;
-	private int columns = 9;
-	private int parentWidth;
-	private int parentHeight;
-	private GridView grid;
-	private AlertDialog dialog;
-	private Activity activity;
-	private TranslateAnimation moveLeftToRight;
+public class ActivityGame extends Activity {
 	
+	private TextView tv_position;
+	private ImageView iv_sheep, iv_stone, iv_shield;
+	private RelativeLayout rl_screen;
+	private AlertDialog dialog;
+	private TranslateAnimation ta_leftToRigth;
+	private LayoutParams lp_sheep, lp_shield;
+	private Random r_anim;
+	private Boolean alive = true;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_game);
-	
-		activity = this;
-
-		dialog = new AlertDialog.Builder(activity)
-        .setTitle("Get ready")
-        .setMessage("3")
-        .setIcon(android.R.drawable.ic_dialog_info)
-        .show();
+		setContentView(R.layout.activity_activity_game_versiontwo);
+		setLayout();
+		
+		dialog = new AlertDialog.Builder(this).setTitle("Get ready").setMessage("3").setIcon(android.R.drawable.ic_dialog_info).show();
 		
 		new CountDownTimer(3000, 1000) {
 
@@ -66,161 +52,126 @@ public class ActivityGame extends Activity{
 			 public void onFinish() {
 				 dialog.setMessage("0"); 
 				 dialog.hide();
-				 setAnimation();
+				 gameRunning();
 			 }
 		}
-	    .start();		
+	    .start();
 		
-		setLayout();
 	}
 	
-	private void setLayout(){
-		
-	    //Puts a grid on top
-		grid = (GridView) findViewById(R.id.myGrid);
-		grid.post(new Runnable() { 
-		public void run(){
-			
-		        Rect rect = new Rect();
-		        Window win = getWindow();
-		        win.getDecorView().getWindowVisibleDisplayFrame(rect);
-		        int statusHeight = rect.top;
-		        int contentViewTop = win.findViewById(Window.ID_ANDROID_CONTENT).getTop();
-		        int titleHeight = contentViewTop - statusHeight;
-		        
-		        Display display = getWindowManager().getDefaultDisplay();
-		        Point size = new Point();
-		        display.getSize(size);
+	public void gameRunning(){
+		final Handler h = new Handler();
+		final int delay = 1000; //milliseconds
 
-				parentWidth = size.x;
-				parentHeight = size.y - statusHeight - titleHeight;
-				
-				grid.setAdapter(new customAdapter());
-			    grid.setOnItemClickListener(new OnItemClickListener() {
-			        @Override
-			        public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
-
-			        	String button;
-			        	int i = 0;
-			        	
-			        	if(position<=26) i = 0;
-			        	else if(position == 58) i = 4;
-			        	else if(position >= 63) i = 3;
-			        	else if(position == 27 || 35 < position && position < 38 || 44 < position && position < 48 || 53 < position && position < 58) i = 1;
-			        	else if(position == 35 || 42 < position && position < 45 || 50 < position && position < 54 || 58 < position && position < 63) i = 2;
-			        	else i=0;
-			        	
-			        	switch (i){ 
-				        	case 0:
-				        		button = "Top";
-				        		break;
-				        	case 1:
-				        		button = "Left";
-				        		break;
-				        	case 2:
-				        		button = "Right"; 
-				        		break;
-				        	case 3:
-				        		button = "Bottom";
-				        		break;
-				        	case 4:
-				        		button = "BAAEE";
-				        		break;
-			        		default:
-				        		button = "Error";
-			        			break;
-			        	}
-			        	
-			        	
-			        	new AlertDialog.Builder(activity)
-			            .setTitle("YO")
-			            .setMessage("You are gay " + position + ", button: " + button)
-			            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-			                public void onClick(DialogInterface dialog, int which) { 
-			                    // continue with delete
-			                }
-			             })
-			            .setIcon(android.R.drawable.ic_dialog_alert)
-			             .show();
-			        		
-			        }
-			    });
-		}
-		});
-		
-
-	}
-	
-	private void playGame(){
-		while(alive){
-			
-			
-		}
-	}
-
-	public class customAdapter extends BaseAdapter{
-		
-	    public View getView(int position, View convertView, ViewGroup parent) {
-	    	//create a basic imageview here or inflate a complex layout with
-	    	//getLayoutInflator().inflate(R.layout...)
-		    ImageView i = new ImageView(activity);
-
-		    Log.i("YO", "" + position);
-		    //sets backround from drawable for the views
-		    if(position == 58){
-		    	i.setImageResource(R.drawable.sheep);		    	
+		h.postDelayed(new Runnable(){
+		    public void run(){
+		        setAnimation();
+		        h.postDelayed(this, delay);
 		    }
-		    else if (position <= 62){
-		    	i.setBackgroundResource(R.drawable.transparent_view);		    	
-		    }
-		    else{
-	    		i.setBackgroundResource(R.drawable.background_ground);	
-		    }
-		    
-	        i.setScaleType(ImageView.ScaleType.FIT_XY);
-
-	        int width = parentWidth/columns ;
-	        int height= parentHeight/rows ;
-	        
-	        i.setLayoutParams(new GridView.LayoutParams(width, height));
-	        return i;
-	    }
-	
-	    public final int getCount() {
-	        return rows * columns;
-	    }
-	
-	    public final long getItemId(int position) {
-	        return position;
-	    }
-
-		@Override
-		public Object getItem(int position) {
-			// TODO Auto-generated method stub
-			return null;
-		}
+		}, delay);
 	}
 	
-	//animation
-	public void setAnimation(){
 
-		
-	    final TextView tv = new TextView(this);
-	    tv.setText("Animation");
-
-	    moveLeftToRight = new TranslateAnimation(0, 200, 0, 0);
-	    moveLeftToRight.setDuration(1000);
-	    moveLeftToRight.setFillAfter(true);
-
-        tv.startAnimation(moveLeftToRight);
-	   		
-	}
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-	    int x = (int)event.getX();
-	    int y = (int)event.getY();
-	    Log.i(Integer.toString(x),Integer.toString(y));
-	return false;
+		int x = (int)event.getX();
+		int y = (int)event.getY();
+		
+		if(x < 400){
+			tv_position.setText("LEFT");
+			setShield("LEFT");
+		}
+		else if(x > 700){
+			tv_position.setText("RIGHT");
+			setShield("RIGHT");
+		}
+		else if(y < 1400){
+			tv_position.setText("TOP");
+			setShield("TOP");
+		}
+		else if(y > 1500){
+			tv_position.setText("BOTTOM");
+			setShield("BOTTOM");
+		}
+		Log.i(Integer.toString(x),Integer.toString(y));
+		return false;
 	}
 	
+	public void setLayout(){
+		rl_screen = (RelativeLayout) findViewById(R.id.rl_screen);
+		
+		tv_position = (TextView) findViewById(R.id.tv_position);
+		
+		iv_sheep = (ImageView) findViewById(R.id.iv_sheep);
+		lp_sheep = (LayoutParams) iv_sheep.getLayoutParams();
+		lp_sheep.width = 100;
+		lp_sheep.height = 100;
+		iv_sheep.setLayoutParams(lp_sheep);
+		iv_sheep.setX(450);
+		iv_sheep.setY(1100);
+	}
+	
+	public void setAnimation(){
+		Integer[] coordinates = RandomizeAnimation();
+		ta_leftToRigth = new TranslateAnimation(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
+	    ta_leftToRigth.setDuration(1000);
+	    
+	    iv_stone = new ImageView(this);
+	    iv_stone.setBackgroundResource(R.drawable.water);
+//	    LayoutParams params = (LayoutParams) iv_stone.getLayoutParams();
+//		params.width = 100;
+//		params.height = 100;
+		iv_stone.setLayoutParams(lp_sheep);
+	    
+	    rl_screen.addView(iv_stone);
+	    
+	    iv_stone.startAnimation(ta_leftToRigth);
+	}
+	
+	public Integer[] RandomizeAnimation(){
+		r_anim = new Random();
+		int randomHolder = r_anim.nextInt(4);
+		Integer[] list;
+		if(randomHolder == 0){							//LEFT
+			list = new Integer[] {0,400,1100,1100};
+		}
+		else if(randomHolder == 1){						//RIGHT
+			list = new Integer[] {800,500,1100,1100};
+		}
+		else if(randomHolder == 2){						//TOP
+			list = new Integer[] {450,450,0,1100};
+		}
+		else{											//BOTTOM
+			list = new Integer[] {450,450,1400,1100};
+		}
+		return list;
+	}
+	
+	public void setShield(String position){
+		iv_shield = new ImageView(this);
+		iv_shield.setBackgroundResource(R.drawable.background_ground);
+		lp_shield = new LayoutParams(10,70);
+//		iv_shield.setLayoutParams(lp_shield);
+//		
+		if(position == "LEFT"){
+			iv_shield.setX(400);
+			iv_shield.setY(1100);			
+		}
+		else if (position == "RIGHT"){
+			iv_shield.setX(600);
+			iv_shield.setY(1100);
+		}
+		else if (position == "TOP"){
+			iv_shield.setRotation(90);
+			iv_shield.setX(500);
+			iv_shield.setY(1000);
+		}
+		else if (position == "BOTTOM"){
+			iv_shield.setRotation(90);
+			iv_shield.setX(500);
+			iv_shield.setY(1200);
+		}
+		rl_screen.addView(iv_shield, lp_shield);
+	}
 }
+
