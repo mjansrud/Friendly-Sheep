@@ -1,6 +1,5 @@
 package com.friendlysheep;
 
-import java.util.ArrayList;
 import java.util.Random;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,17 +10,15 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.DragEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnDragListener;
-import android.view.View.OnTouchListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 
-public class ActivityGame extends Activity  implements OnTouchListener{
+public class ActivityGame extends Activity  implements OnDragListener{
 	
 	private TextView tv_position;
 	private ImageView iv_sheep, iv_stone;
@@ -30,19 +27,13 @@ public class ActivityGame extends Activity  implements OnTouchListener{
 	private TranslateAnimation ta_leftToRigth;
 	private LayoutParams lp_sheep;
 	private Random r_anim;
-	private ViewDrawPath viewDrawPath;
-	private Activity activity;
-	private ArrayList<ViewDrawPath> viewDrawPaths;
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
 		setLayout();
 		
-		activity = this;
 		dialog = new AlertDialog.Builder(this).setTitle("Get ready").setMessage("3").setIcon(android.R.drawable.ic_dialog_info).show();
-		viewDrawPaths = new ArrayList<ViewDrawPath>();
 		
 		new CountDownTimer(3000, 1000) {
 
@@ -143,15 +134,26 @@ public class ActivityGame extends Activity  implements OnTouchListener{
 	}
 
 	@Override
-	public boolean onTouch(View arg0, MotionEvent arg1) {
+	public boolean onDrag(View v, DragEvent event) {
+
 		// TODO Auto-generated method stub
-		// TODO Auto-generated method stub
-		Log.i("ActivityGame", "drag");
-		viewDrawPath = new ViewDrawPath(activity);
-		viewDrawPaths.add(viewDrawPath);
-		return false;
+	    switch (event.getAction()) {
+	    case DragEvent.ACTION_DRAG_STARTED:
+	    	 Log.i("ActivityGame","Drag started");
+	    	 break;
+	    case DragEvent.ACTION_DRAG_ENTERED:
+	    	 break;
+	    case DragEvent.ACTION_DRAG_EXITED:        
+	    	break;
+	    case DragEvent.ACTION_DROP:
+	    	break;
+	    case DragEvent.ACTION_DRAG_ENDED:
+	    	break;
+	    default:
+	    	break;
+	    }
+	    return true;
 	}
-	
 	
 
 }
