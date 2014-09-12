@@ -9,12 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.friendlysheep.ActivityGame" >
 
-    <TextView
-        android:id="@+id/tv_position"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="touch the screen" />
-    
     <ImageView 
         android:id="@+id/iv_sheep"
         android:layout_width="wrap_content"
