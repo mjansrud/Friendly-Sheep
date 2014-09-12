@@ -108,16 +108,6 @@ public class ActivityGame extends Activity  {
 		
 	    final ViewDrawPath viewDrawPath = new ViewDrawPath(this);
 	    rl_screen.addView(viewDrawPath);
-	    rl_screen.removeView(viewDrawPath);
-	    
-//	    final Handler handler = new Handler();
-//	    handler.postDelayed(new Runnable() {
-//	      @Override
-//	      public void run() {
-//	    	  rl_screen.removeView(viewDrawPath);
-//	      }
-//	    }, 1000);
-    
 	    
 	    mPaint = new Paint();
 	    mPaint.setAntiAlias(true);
@@ -127,6 +117,15 @@ public class ActivityGame extends Activity  {
 	    mPaint.setStrokeJoin(Paint.Join.ROUND);
 	    mPaint.setStrokeCap(Paint.Cap.ROUND);
 	    mPaint.setStrokeWidth(12);  
+	    
+//	    final Handler handler = new Handler();
+//	    handler.postDelayed(new Runnable() {
+//	    	@Override
+//	    	public void run() {
+//	    		rl_screen.removeView(viewDrawPath);
+//	    		Log.i("DELAY", "-------------------------");
+//	    	}
+//	    }, 1500);
 	    
 	}
 	
