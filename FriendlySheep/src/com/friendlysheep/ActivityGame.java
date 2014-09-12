@@ -90,6 +90,7 @@ public class ActivityGame extends Activity  {
 		    }
 		}, delay);
 	}
+	
 
 	public void setLayout(){
 
@@ -105,8 +106,18 @@ public class ActivityGame extends Activity  {
 		iv_sheep.setX(450);
 		iv_sheep.setY(1100);
 		
-	    ViewDrawPath viewDrawPath = new ViewDrawPath(this);
+	    final ViewDrawPath viewDrawPath = new ViewDrawPath(this);
 	    rl_screen.addView(viewDrawPath);
+	    rl_screen.removeView(viewDrawPath);
+	    
+//	    final Handler handler = new Handler();
+//	    handler.postDelayed(new Runnable() {
+//	      @Override
+//	      public void run() {
+//	    	  rl_screen.removeView(viewDrawPath);
+//	      }
+//	    }, 1000);
+    
 	    
 	    mPaint = new Paint();
 	    mPaint.setAntiAlias(true);
@@ -194,7 +205,8 @@ public class ViewDrawPath extends View {
 	        circlePaint.setColor(Color.BLUE);
 	        circlePaint.setStyle(Paint.Style.STROKE);
 	        circlePaint.setStrokeJoin(Paint.Join.MITER);
-	        circlePaint.setStrokeWidth(4f); 
+	        circlePaint.setStrokeWidth(4f);
+	        
         }
 
         @Override
@@ -262,7 +274,9 @@ public class ViewDrawPath extends View {
 	                break;
 	        }
 	        return true;
-        }  
+        }
+        
+        
     }
 
 	
