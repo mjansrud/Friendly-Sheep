@@ -90,6 +90,7 @@ public class ActivityGame extends Activity  {
 		    }
 		}, delay);
 	}
+	
 
 	public void setLayout(){
 
@@ -105,7 +106,7 @@ public class ActivityGame extends Activity  {
 		iv_sheep.setX(450);
 		iv_sheep.setY(1100);
 		
-	    ViewDrawPath viewDrawPath = new ViewDrawPath(this);
+	    final ViewDrawPath viewDrawPath = new ViewDrawPath(this);
 	    rl_screen.addView(viewDrawPath);
 	    
 	    mPaint = new Paint();
@@ -116,6 +117,7 @@ public class ActivityGame extends Activity  {
 	    mPaint.setStrokeJoin(Paint.Join.ROUND);
 	    mPaint.setStrokeCap(Paint.Cap.ROUND);
 	    mPaint.setStrokeWidth(12);  
+	    
 	    
 	}
 	
@@ -194,7 +196,8 @@ public class ViewDrawPath extends View {
 	        circlePaint.setColor(Color.BLUE);
 	        circlePaint.setStyle(Paint.Style.STROKE);
 	        circlePaint.setStrokeJoin(Paint.Join.MITER);
-	        circlePaint.setStrokeWidth(4f); 
+	        circlePaint.setStrokeWidth(4f);
+	        
         }
 
         @Override
@@ -251,6 +254,14 @@ public class ViewDrawPath extends View {
 			}, delay);
 	        
 	        mPath.reset();
+	        
+	        final Handler handler = new Handler();
+		    handler.postDelayed(new Runnable() {
+		    	@Override
+		    	public void run() {
+		    		Log.i("DELAY", "-------------------------");
+		    	}
+		    }, 1500);
         }
 
         @SuppressLint("ClickableViewAccessibility") @Override
@@ -273,7 +284,9 @@ public class ViewDrawPath extends View {
 	                break;
 	        }
 	        return true;
-        }  
+        }
+        
+        
     }
 
 	
