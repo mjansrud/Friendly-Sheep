@@ -239,9 +239,11 @@ public class ViewDrawPath extends View {
         private static final float TOUCH_TOLERANCE = 4;
 
         private void touch_start(float x, float y) {
-	        mBitmap = Bitmap.createBitmap(displayWidth, displayHeight, Bitmap.Config.ARGB_8888);
-	        mBitmaps.add(mBitmap);
-	        mCanvas = new Canvas(mBitmap);
+	        Bitmap bitmap = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_8888);
+	        bitmap.eraseColor(Color.TRANSPARENT);
+	        mBitmap = bitmap;
+	        mBitmaps.add(bitmap);
+	        mCanvas = new Canvas(bitmap);
 	        mPath.reset();
 	        mPath.moveTo(x, y);
 	        mX = x;
@@ -294,7 +296,7 @@ public class ViewDrawPath extends View {
 	                invalidate();
 	                break;
 	            case MotionEvent.ACTION_MOVE:
-	            	if(((Math.abs(startX - x) + Math.abs(startY - y)) < 150) && hasDrawn){
+	            	if(((Math.abs(startX - x) + Math.abs(startY - y)) < 500) && hasDrawn){
 	                touch_move(x, y);
 	                invalidate();
 	            	}
