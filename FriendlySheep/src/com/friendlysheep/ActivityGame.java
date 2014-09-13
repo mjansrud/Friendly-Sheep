@@ -212,7 +212,7 @@ public class ViewDrawPath extends View {
 		    mPaint = new Paint();
 		    mPaint.setAntiAlias(true);
 		    mPaint.setDither(true);
-		    mPaint.setColor(Color.TRANSPARENT);
+		    mPaint.setColor(Color.WHITE);
 		    mPaint.setStyle(Paint.Style.STROKE);
 		    mPaint.setStrokeJoin(Paint.Join.ROUND);
 		    mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -220,12 +220,12 @@ public class ViewDrawPath extends View {
 
 		    mPaintTransparent = new Paint();
 		    mPaintTransparent.setAntiAlias(true);
-		    mPaintTransparent.setDither(true);
-		    mPaintTransparent.setColor(Color.GREEN);
+		    mPaintTransparent.setDither(true); 
+		    mPaintTransparent.setColor(Color.BLACK);
 		    mPaintTransparent.setStyle(Paint.Style.STROKE);
 		    mPaintTransparent.setStrokeJoin(Paint.Join.ROUND);
 		    mPaintTransparent.setStrokeCap(Paint.Cap.ROUND);
-		    mPaintTransparent.setStrokeWidth(12);  
+		    mPaintTransparent.setStrokeWidth(14);  
         }
 
         @Override
@@ -272,11 +272,9 @@ public class ViewDrawPath extends View {
 	        }
         }
         private void touch_up() {
-	        mPath.lineTo(mX, mY);
+        	
 	        circlePath.reset();
-	        // commit the path to our offscreen
 	        mCanvas.drawPath(mPath,  mPaint);
-	        // kill this so we don't double draw
 
     		mPaths.add(new Path(mPath));
 	        mPath.reset();
