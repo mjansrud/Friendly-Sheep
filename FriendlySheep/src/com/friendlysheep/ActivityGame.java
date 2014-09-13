@@ -212,7 +212,7 @@ public class ViewDrawPath extends View {
 		    mPaint = new Paint();
 		    mPaint.setAntiAlias(true);
 		    mPaint.setDither(true);
-		    mPaint.setColor(Color.WHITE);
+		    mPaint.setColor(Color.TRANSPARENT);
 		    mPaint.setStyle(Paint.Style.STROKE);
 		    mPaint.setStrokeJoin(Paint.Join.ROUND);
 		    mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -238,9 +238,8 @@ public class ViewDrawPath extends View {
         protected void onDraw(Canvas canvas) {
         	super.onDraw(canvas);
 	        if(mBitmap != null){
-	
 			    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
-			    canvas.drawPath( mPath,  mPaint);
+				canvas.drawPath( mPath,  mPaint);
 			    canvas.drawPath( circlePath,  circlePaint);
 	        	
 	        }
@@ -267,7 +266,6 @@ public class ViewDrawPath extends View {
 	            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
 	            mX = x;
 	            mY = y;
-
 		        mCanvas.drawPath(mPath,  mPaint);
 	            circlePath.reset();
 	            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
@@ -280,9 +278,7 @@ public class ViewDrawPath extends View {
 	        mCanvas.drawPath(mPath,  mPaint);
 	        // kill this so we don't double draw
 
-    		Path path = new Path();
-    		path = mPath;
-    		mPaths.add(path);
+    		mPaths.add(new Path(mPath));
 	        mPath.reset();
 	        
 	        final Handler handler = new Handler();
