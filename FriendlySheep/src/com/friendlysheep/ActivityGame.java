@@ -31,6 +31,7 @@ public class ActivityGame extends Activity  {
 	private LayoutParams lp_sheep;
 	private Random r_anim;
 	private Paint mPaint;
+	private Paint mPaintTransparent;
 	private int displayWidth;
 	private int displayHeight;
 	private Activity activity;
@@ -115,16 +116,7 @@ public class ActivityGame extends Activity  {
 		
 	    viewDrawPath = new ViewDrawPath(this);
 	    rl_screen.addView(viewDrawPath);
-	    
-	    mPaint = new Paint();
-	    mPaint.setAntiAlias(true);
-	    mPaint.setDither(true);
-	    mPaint.setColor(Color.WHITE);
-	    mPaint.setStyle(Paint.Style.STROKE);
-	    mPaint.setStrokeJoin(Paint.Join.ROUND);
-	    mPaint.setStrokeCap(Paint.Cap.ROUND);
-	    mPaint.setStrokeWidth(12);  
-	    
+	   
 	    
 	}
 	
@@ -194,7 +186,7 @@ public class ViewDrawPath extends View {
         public int width;
         public  int height;
         private Bitmap  mBitmap;
-        private ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>();
+        private ArrayList<Path> mPaths = new ArrayList<Path>();
         private Canvas  mCanvas;
         private Path    mPath;
         private Paint   mBitmapPaint;
@@ -204,6 +196,7 @@ public class ViewDrawPath extends View {
         private boolean hasDrawn;
 
         public ViewDrawPath(Context c) {
+        	
 	        super(c);
 	        context=c;
 	        mPath = new Path();
@@ -216,16 +209,34 @@ public class ViewDrawPath extends View {
 	        circlePaint.setStrokeJoin(Paint.Join.MITER);
 	        circlePaint.setStrokeWidth(4f);
 	        
+		    mPaint = new Paint();
+		    mPaint.setAntiAlias(true);
+		    mPaint.setDither(true);
+		    mPaint.setColor(Color.WHITE);
+		    mPaint.setStyle(Paint.Style.STROKE);
+		    mPaint.setStrokeJoin(Paint.Join.ROUND);
+		    mPaint.setStrokeCap(Paint.Cap.ROUND);
+		    mPaint.setStrokeWidth(12);  
+
+		    mPaintTransparent = new Paint();
+		    mPaintTransparent.setAntiAlias(true);
+		    mPaintTransparent.setDither(true);
+		    mPaintTransparent.setColor(Color.GREEN);
+		    mPaintTransparent.setStyle(Paint.Style.STROKE);
+		    mPaintTransparent.setStrokeJoin(Paint.Join.ROUND);
+		    mPaintTransparent.setStrokeCap(Paint.Cap.ROUND);
+		    mPaintTransparent.setStrokeWidth(12);  
         }
 
         @Override
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 	        super.onSizeChanged(w, h, oldw, oldh);
-
+        		mBitmap = Bitmap.createBitmap(displayWidth, displayHeight, Bitmap.Config.ARGB_8888);
+        		mCanvas = new Canvas(mBitmap);
         }
         @Override
         protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+        	super.onDraw(canvas);
 	        if(mBitmap != null){
 	
 			    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
@@ -239,11 +250,7 @@ public class ViewDrawPath extends View {
         private static final float TOUCH_TOLERANCE = 4;
 
         private void touch_start(float x, float y) {
-	        Bitmap bitmap = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_8888);
-	        bitmap.eraseColor(Color.TRANSPARENT);
-	        mBitmap = bitmap; 
-	        mBitmaps.add(bitmap);
-	        mCanvas = new Canvas(bitmap);
+        	
 	        mPath.reset();
 	        mPath.moveTo(x, y);
 	        mX = x;
@@ -260,7 +267,8 @@ public class ViewDrawPath extends View {
 	            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
 	            mX = x;
 	            mY = y;
-	
+
+		        mCanvas.drawPath(mPath,  mPaint);
 	            circlePath.reset();
 	            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
 	        }
@@ -271,14 +279,17 @@ public class ViewDrawPath extends View {
 	        // commit the path to our offscreen
 	        mCanvas.drawPath(mPath,  mPaint);
 	        // kill this so we don't double draw
-	        
+
+    		Path path = new Path();
+    		path = mPath;
+    		mPaths.add(path);
 	        mPath.reset();
 	        
 	        final Handler handler = new Handler();
 		    handler.postDelayed(new Runnable() {
 		    	@Override
 		    	public void run() {
-			    	mBitmaps.remove(0).eraseColor(Color.TRANSPARENT);
+			    	mCanvas.drawPath( mPaths.remove(0),  mPaintTransparent);
 		    		Log.i("DELAY", "-------------------------");
 		    	}
 		    }, 1500);
@@ -297,8 +308,8 @@ public class ViewDrawPath extends View {
 	                break;
 	            case MotionEvent.ACTION_MOVE:
 	            	if(((Math.abs(startX - x) + Math.abs(startY - y)) < 500) && hasDrawn){
-	                touch_move(x, y);
-	                invalidate();
+	            		touch_move(x, y);
+	            		invalidate();
 	            	}
 	            	else {
 	            		hasDrawn = false;
