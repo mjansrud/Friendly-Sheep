@@ -2,9 +2,9 @@ package com.friendlysheep;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -18,17 +18,14 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
-import android.widget.TextView;
 
 public class ActivityGame extends Activity  {
 	
-	private TextView tv_position;
-	private ImageView iv_sheep, iv_stone;
+	private ImageView iv_sheep;
 	private RelativeLayout rl_screen;
 	private TranslateAnimation ta_leftToRigth;
 	private LayoutParams lp_sheep;
@@ -37,14 +34,17 @@ public class ActivityGame extends Activity  {
 	private int displayWidth;
 	private int displayHeight;
 	private Activity activity;
+	private ViewDrawPath viewDrawPath;
+	
 	@Override
+	
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
 		setLayout();
 		
 		Log("View created");
-		
+		r_anim = new Random();
 		/*
 		dialog = new AlertDialog.Builder(this).setTitle("Get ready").setMessage("3").setIcon(android.R.drawable.ic_dialog_info).show();
 		
@@ -80,17 +80,24 @@ public class ActivityGame extends Activity  {
 	}
 	
 	public void gameRunning(){
+		
+		newAnimation();
+		
+	}
+	
+	public void newAnimation(){
+		
 		final Handler h = new Handler();
-		final int delay = 1000; //milliseconds
+		final int delay = r_anim.nextInt(900 - 400) + 400; //milliseconds
 
 		h.postDelayed(new Runnable(){
 		    public void run(){
 		        setAnimation();
 		        h.postDelayed(this, delay);
 		    }
-		}, delay);
+		}, delay);		
+		
 	}
-	
 
 	public void setLayout(){
 
@@ -106,7 +113,7 @@ public class ActivityGame extends Activity  {
 		iv_sheep.setX(450);
 		iv_sheep.setY(1100);
 		
-	    final ViewDrawPath viewDrawPath = new ViewDrawPath(this);
+	    viewDrawPath = new ViewDrawPath(this);
 	    rl_screen.addView(viewDrawPath);
 	    
 	    mPaint = new Paint();
@@ -127,12 +134,22 @@ public class ActivityGame extends Activity  {
 		ta_leftToRigth = new TranslateAnimation(coordinates[0], coordinates[1], coordinates[2], coordinates[3]);
 	    ta_leftToRigth.setDuration(1000);
 	    
-	    iv_stone = new ImageView(activity);
+	    final ImageView iv_stone = new ImageView(activity);
 	    iv_stone.setBackgroundResource(R.drawable.water);
 
 		iv_stone.setLayoutParams(lp_sheep);
 	    rl_screen.addView(iv_stone);
 	    iv_stone.startAnimation(ta_leftToRigth);
+	    
+		final Handler h = new Handler();
+		final int delay = 1000; //milliseconds
+
+		h.postDelayed(new Runnable(){
+		    public void run(){
+			    rl_screen.removeView(iv_stone);
+		        h.postDelayed(this, delay);
+		    }
+		}, delay);
 	    
 	}
 	
@@ -141,7 +158,6 @@ public class ActivityGame extends Activity  {
 		int randomY = 0;
 		int randomX = 0;
 		
-		r_anim = new Random();
 		int randomPosition = r_anim.nextInt(4);
 		
 		switch (randomPosition){
@@ -178,12 +194,14 @@ public class ViewDrawPath extends View {
         public int width;
         public  int height;
         private Bitmap  mBitmap;
+        private ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>();
         private Canvas  mCanvas;
         private Path    mPath;
         private Paint   mBitmapPaint;
         Context context;
         private Paint circlePaint;
         private Path circlePath;
+        private boolean hasDrawn;
 
         public ViewDrawPath(Context c) {
 	        super(c);
@@ -203,32 +221,41 @@ public class ViewDrawPath extends View {
         @Override
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 	        super.onSizeChanged(w, h, oldw, oldh);
-	        mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-	        mCanvas = new Canvas(mBitmap);
+
         }
         @Override
         protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-		    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
-		    canvas.drawPath( mPath,  mPaint);
-		    canvas.drawPath( circlePath,  circlePaint);
+	        if(mBitmap != null){
+	
+			    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
+			    canvas.drawPath( mPath,  mPaint);
+			    canvas.drawPath( circlePath,  circlePaint);
+	        	
+	        }
         }
 
-        private float mX, mY;
+        private float mX, mY, startX, startY;
         private static final float TOUCH_TOLERANCE = 4;
 
         private void touch_start(float x, float y) {
+	        mBitmap = Bitmap.createBitmap(displayWidth, displayHeight, Bitmap.Config.ARGB_8888);
+	        mBitmaps.add(mBitmap);
+	        mCanvas = new Canvas(mBitmap);
 	        mPath.reset();
 	        mPath.moveTo(x, y);
 	        mX = x;
-	        mY = y;
+	        mY = y;	        
+	        startX = x;
+	        startY = y;
         }
+        
         private void touch_move(float x, float y) {
 	        float dx = Math.abs(x - mX);
 	        float dy = Math.abs(y - mY);
+	        
 	        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-	             mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+	            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
 	            mX = x;
 	            mY = y;
 	
@@ -243,22 +270,13 @@ public class ViewDrawPath extends View {
 	        mCanvas.drawPath(mPath,  mPaint);
 	        // kill this so we don't double draw
 	        
-			final Handler h = new Handler();
-			final int delay = 1000; //milliseconds
-
-			h.postDelayed(new Runnable(){
-			    public void run(){
-			        // setAnimation();
-			        h.postDelayed(this, delay);
-			    }
-			}, delay);
-	        
 	        mPath.reset();
 	        
 	        final Handler handler = new Handler();
 		    handler.postDelayed(new Runnable() {
 		    	@Override
 		    	public void run() {
+			    	mBitmaps.remove(0).eraseColor(Color.TRANSPARENT);
 		    		Log.i("DELAY", "-------------------------");
 		    	}
 		    }, 1500);
@@ -271,19 +289,25 @@ public class ViewDrawPath extends View {
 	
 	        switch (event.getAction()) {
 	            case MotionEvent.ACTION_DOWN:
+	            	hasDrawn = true;
 	                touch_start(x, y);
 	                invalidate();
 	                break;
 	            case MotionEvent.ACTION_MOVE:
+	            	if(((Math.abs(startX - x) + Math.abs(startY - y)) < 150) && hasDrawn){
 	                touch_move(x, y);
 	                invalidate();
+	            	}
+	            	else {
+	            		hasDrawn = false;
+	            	}
 	                break;
 	            case MotionEvent.ACTION_UP:
 	                touch_up();
 	                invalidate();
 	                break;
 	        }
-	        return true;
+        return true;
         }
         
         
