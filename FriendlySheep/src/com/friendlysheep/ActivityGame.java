@@ -248,7 +248,6 @@ public class ViewDrawPath extends View {
 		    handler.postDelayed(new Runnable() {
 		    	@Override
 		    	public void run() {
-		    		
 		    		Log.i("DELAY", "-------------------------");
 		    	}
 		    }, 1500);
