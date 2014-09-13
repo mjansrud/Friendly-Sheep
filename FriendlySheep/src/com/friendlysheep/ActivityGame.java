@@ -144,7 +144,9 @@ public class ActivityGame extends Activity  {
 		}, delay);
 	    
 	}
+
 	
+	 
 	public Integer[] RandomizeAnimation(){
 		
 		int randomY = 0;
