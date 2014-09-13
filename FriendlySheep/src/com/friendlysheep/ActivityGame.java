@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.friendlysheep;
 
 import android.app.Activity;
@@ -312,6 +311,3 @@ public class ViewDrawPath extends View {
 
 	
 }
-
-
->>>>>>> branch 'master' of https://github.com/mjansrud/Friendly-Sheep.git
