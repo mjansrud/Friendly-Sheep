@@ -118,14 +118,6 @@ public class ActivityGame extends Activity  {
 	    mPaint.setStrokeCap(Paint.Cap.ROUND);
 	    mPaint.setStrokeWidth(12);  
 	    
-//	    final Handler handler = new Handler();
-//	    handler.postDelayed(new Runnable() {
-//	    	@Override
-//	    	public void run() {
-//	    		rl_screen.removeView(viewDrawPath);
-//	    		Log.i("DELAY", "-------------------------");
-//	    	}
-//	    }, 1500);
 	    
 	}
 	
@@ -251,6 +243,15 @@ public class ViewDrawPath extends View {
 	        mCanvas.drawPath(mPath,  mPaint);
 	        // kill this so we don't double draw
 	        mPath.reset();
+	        
+	        final Handler handler = new Handler();
+		    handler.postDelayed(new Runnable() {
+		    	@Override
+		    	public void run() {
+		    		
+		    		Log.i("DELAY", "-------------------------");
+		    	}
+		    }, 1500);
         }
 
         @SuppressLint("ClickableViewAccessibility") @Override
