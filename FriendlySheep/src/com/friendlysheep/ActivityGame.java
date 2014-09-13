@@ -241,7 +241,7 @@ public class ViewDrawPath extends View {
         private void touch_start(float x, float y) {
 	        Bitmap bitmap = Bitmap.createBitmap(150, 150, Bitmap.Config.ARGB_8888);
 	        bitmap.eraseColor(Color.TRANSPARENT);
-	        mBitmap = bitmap;
+	        mBitmap = bitmap; 
 	        mBitmaps.add(bitmap);
 	        mCanvas = new Canvas(bitmap);
 	        mPath.reset();
