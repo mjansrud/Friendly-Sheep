@@ -23,6 +23,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".ActivityGame" />
+        <activity
+            android:name=".ActivityGame"
+            android:label="@string/title_activity_activity_game_versiontwo" >
+        </activity>
     </application>
 
 </manifest>
