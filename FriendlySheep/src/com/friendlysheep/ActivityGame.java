@@ -453,10 +453,7 @@ public class ViewDrawPath extends View {
 	    mScene = new Scene(1);
 	    mScene.setBackground(new ColorBackground(0.09804f, 0.6274f, 0.8784f));
 	
-	    sheep  = addSprite(mScene, 250, 1000, sheepRegion);
-	    bullet = addAnimatedSprite(mScene, 130, 150, 10, bulletRegion);
-	    
-	    bullet.setCurrentTileIndex(9);
+	    sheep  = addSprite(mScene, 250, 1000, sheepRegion);  
 	    
 	    mBulletSprites = new ArrayList<Shape>();
 	    mTargetSprites = new ArrayList<Shape>();
@@ -474,7 +471,7 @@ public class ViewDrawPath extends View {
 	        public void onUpdate(final float pSecondsElapsed) {
 	            for(Shape bullet : mBulletSprites){
 	    	            for(Shape target : mTargetSprites){
-		                    if(bullet != null && bullet.collidesWith(target)){
+		                    if(bullet.collidesWith(target)){
 		                    	Log("Removed item");
 		                        collisionText.setText("bam!");
 		                        bullet.detachSelf();
@@ -526,8 +523,7 @@ public class ViewDrawPath extends View {
 	
 	public void newSprite(){
 
-	     PixelPerfectAnimatedSprite bullet = addAnimatedSprite(mScene, -10, -10, 10, bulletRegion);
-		 mBulletSprites.add(bullet);
+		 mBulletSprites.add(addAnimatedSprite(mScene, -10, -10, 10, bulletRegion));
 		 
 	}
 	
@@ -578,7 +574,7 @@ public class ViewDrawPath extends View {
 		objCenterPos = sheep.getSceneCenterCoordinates();
 		org.anddev.andengine.entity.modifier.PathModifier.Path path = new org.anddev.andengine.entity.modifier.PathModifier.Path(2).to(coordinates[0], coordinates[2]).to(objCenterPos[0], objCenterPos[1]);
 		sprite.registerEntityModifier(new LoopEntityModifier(new PathModifier(3, path)));
-	    
+		
 	    return sprite;
 	} 
 	
