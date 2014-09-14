@@ -99,7 +99,8 @@ public class ActivityGame extends BaseGameActivity {
     private BitmapTextureAtlas mFontTexture;
     private Font mFont;
     private PixelPerfectTextureRegion sheepRegion;
-	private ArrayList<Shape> mSprites;
+	private ArrayList<Shape> mBulletSprites;
+	private ArrayList<Shape> mTargetSprites;
 	
     private PixelPerfectSprite sheep;
     private PixelPerfectAnimatedSprite bullet;
@@ -457,9 +458,9 @@ public class ViewDrawPath extends View {
 	    
 	    bullet.setCurrentTileIndex(9);
 	    
-	    mSprites = new ArrayList<Shape>();
-	    mSprites.add(bullet);
-	    mSprites.add(sheep);
+	    mBulletSprites = new ArrayList<Shape>();
+	    mTargetSprites = new ArrayList<Shape>();
+	    mTargetSprites.add(sheep);
 	    
 	    final ChangeableText collisionText = new ChangeableText(0, 0, this.mFont, "no collisions");
 	    mScene.attachChild(collisionText);
@@ -471,15 +472,18 @@ public class ViewDrawPath extends View {
 	
 	        @Override
 	        public void onUpdate(final float pSecondsElapsed) {
-	            for(Shape spriteA : mSprites){
-	                for(Shape spriteB : mSprites){
-	                    if(spriteA != null && spriteB != null && spriteA != spriteB && spriteA.collidesWith(spriteB)){
-	                        collisionText.setText("bam!");
-	                        return;
-	                    }
+	            for(Shape bullet : mBulletSprites){
+	    	            for(Shape target : mTargetSprites){
+		                    if(bullet != null && bullet.collidesWith(target)){
+		                    	Log("Removed item");
+		                        collisionText.setText("bam!");
+		                        bullet.detachSelf();
+		                        mBulletSprites.remove(bullet);
+		                        return;
+		                    }
 	                }
 	            }
-	            collisionText.setText("");
+	            collisionText.setText(""); 
 	        }
 	    });
 	
@@ -509,7 +513,7 @@ public class ViewDrawPath extends View {
 	public void newAnimation(){
 		
 		final Handler h = new Handler();
-		final int delay = r_anim.nextInt(900 - 400) + 400; //milliseconds
+		final int delay = r_anim.nextInt(5000 - 2000) + 2000; //milliseconds 
 
 		h.postDelayed(new Runnable(){
 		    public void run(){
@@ -522,21 +526,9 @@ public class ViewDrawPath extends View {
 	
 	public void newSprite(){
 
-	     final PixelPerfectAnimatedSprite bullet = addAnimatedSprite(mScene, -10, -10, 10, bulletRegion);
-		 mSprites.add(bullet);
+	     PixelPerfectAnimatedSprite bullet = addAnimatedSprite(mScene, -10, -10, 10, bulletRegion);
+		 mBulletSprites.add(bullet);
 		 
-         final Handler handler = new Handler();
-	     handler.postDelayed(new Runnable() {
-	    	@Override
-	    	public void run() {
-	    		bullet.detachSelf();
-	    		Log.i("DELAY", "-------------------------");
-	    	}
-	     }, 1500);
-	}
-	
-	public void setAnimation(){
-
 	}
 	
 	public Integer[] RandomizeAnimation(){
@@ -582,11 +574,13 @@ public class ViewDrawPath extends View {
 	    scene.registerTouchArea(sprite);
 
 		Integer[] coordinates = RandomizeAnimation();
-		org.anddev.andengine.entity.modifier.PathModifier.Path path = new org.anddev.andengine.entity.modifier.PathModifier.Path(2).to(coordinates[0], coordinates[2]).to(450, 1100);
-		sprite.registerEntityModifier(new LoopEntityModifier(new PathModifier(2, path)));
+		float[] objCenterPos = new float[2];
+		objCenterPos = sheep.getSceneCenterCoordinates();
+		org.anddev.andengine.entity.modifier.PathModifier.Path path = new org.anddev.andengine.entity.modifier.PathModifier.Path(2).to(coordinates[0], coordinates[2]).to(objCenterPos[0], objCenterPos[1]);
+		sprite.registerEntityModifier(new LoopEntityModifier(new PathModifier(3, path)));
 	    
 	    return sprite;
-	}
+	} 
 	
 	private PixelPerfectSprite addSprite(final Scene scene, final int x, final int y, final PixelPerfectTextureRegion region){
 	    PixelPerfectSprite sprite = new PixelPerfectSprite(x,y,region){
