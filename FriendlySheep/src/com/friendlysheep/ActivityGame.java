@@ -395,7 +395,7 @@ public class ActivityGame extends BaseGameActivity {
 				public BaseBitmapTextureAtlasSourceDecorator clone() {
 					// TODO Auto-generated method stub
 					return null;
-				} 
+				}  
     		};
 
     		mDrawingTextureRegion = PixelPerfectTextureRegionFactory.createFromSource(mDrawingTexture, decoratedTextureAtlasSource, 0, 0);       	
