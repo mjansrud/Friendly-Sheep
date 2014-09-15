@@ -365,12 +365,17 @@ public class ActivityGame extends BaseGameActivity {
 
     		mPaths.add(new Path(mPath));
 	        mPath.reset();
+		    startTimerForRemove();
 	        
-	        final Handler handler = new Handler();
+        }
+        
+        private void startTimerForRemove(){
+        	final Handler handler = new Handler();
 		    handler.postDelayed(new Runnable() {
 		    	@Override
 		    	public void run() {
 			    	mCanvas.drawPath( mPaths.remove(0),  mPaintTransparent);
+			    	invalidate();
 		    		Log.i("DELAY", "-------------------------");
 		    	}
 		    }, 1500);
