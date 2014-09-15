@@ -14,6 +14,7 @@ import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.PathModifier;
 import org.anddev.andengine.entity.scene.Scene;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
+import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSLogger;
@@ -26,7 +27,10 @@ import org.anddev.andengine.opengl.texture.ITexture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.source.EmptyBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
+import org.anddev.andengine.opengl.texture.atlas.bitmap.source.decorator.BaseBitmapTextureAtlasSourceDecorator;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import com.qwerjk.andengine.entity.sprite.PixelPerfectAnimatedSprite;
@@ -41,11 +45,15 @@ import android.widget.Toast;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.Point;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
@@ -96,8 +104,11 @@ public class ActivityGame extends BaseGameActivity {
     
 	private BitmapTextureAtlas mBitmapTextureAtlas;
 	private ITexture mDecoratedBalloonTextureRegion;
+	private Paint transparentPaint;
 	
-	
+	private IBitmapTextureAtlasSource baseTextureSource;
+	private IBitmapTextureAtlasSource decoratedTextureAtlasSource;
+
 	@Override
 	public Engine onLoadEngine() {
 		
@@ -136,8 +147,12 @@ public class ActivityGame extends BaseGameActivity {
 	    this.mEngine.getFontManager().loadFont(this.mFont);
 	
 	    //create textures with minimum sizes
+
+	    this.mDrawingTexture = new BitmapTextureAtlas(2048, 2048, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 	    this.mBulletTexture = new BitmapTextureAtlas(2048, 128, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 	    this.mSheepTexture = new BitmapTextureAtlas(2048, 1024, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	   
+	    this.baseTextureSource = new EmptyBitmapTextureAtlasSource(mDisplayWidth, mDisplayHeight);
 	    
 	    //create regions and fetch bitmaps - add to texture
 	    this.mBulletRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mBulletTexture, this, "spinning-triangle.png", 0, 0, 20, 1);
@@ -315,6 +330,7 @@ public class ActivityGame extends BaseGameActivity {
 	        super.onSizeChanged(w, h, oldw, oldh);
 				mBitmap = Bitmap.createBitmap(mDisplayWidth, mDisplayHeight, Bitmap.Config.ARGB_8888);
         		mCanvas = new Canvas(mBitmap);
+				transparentPaint = new Paint();
         		 
         }
         @Override
@@ -361,11 +377,36 @@ public class ActivityGame extends BaseGameActivity {
 	        mPath.reset();
 		    startTimerForRemove();
 	        
+		    
+		    addDrawing();
+		    
+		    
+        }
+        
+        private void addDrawing(){
+    		
+    		decoratedTextureAtlasSource = new BaseBitmapTextureAtlasSourceDecorator(baseTextureSource) {
+    			@Override
+    			protected void onDecorateBitmap(Canvas pCanvas) {
+    				pCanvas.drawBitmap(mBitmap, 0, 0, mPaint);
+    			}
+    			
+				@Override
+				public BaseBitmapTextureAtlasSourceDecorator clone() {
+					// TODO Auto-generated method stub
+					return null;
+				}
+    		};
+
+    		mDrawingTextureRegion = PixelPerfectTextureRegionFactory.createFromSource(mDrawingTexture, decoratedTextureAtlasSource, 0, 0);       	
+    	    mDrawing  = addSprite(mScene, 0, 0, mDrawingTextureRegion); 
+    		mTargetSprites.add(mDrawing);
+    		mScene.setBackground(new SpriteBackground(mDrawing));
         }
         
         private void startTimerForRemove(){
         	final Handler handler = new Handler();
-		    handler.postDelayed(new Runnable() {
+		    handler.postDelayed(new Runnable() { 
 		    	@Override
 		    	public void run() {
 			    	mCanvas.drawPath( mPaths.remove(0),  mPaintTransparent);
