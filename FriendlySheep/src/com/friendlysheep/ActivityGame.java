@@ -291,7 +291,7 @@ public class ActivityGame extends BaseGameActivity {
         private Paint   mBitmapPaint;
         Context context;
         private Paint circlePaint;
-        private Path circlePath;
+        private Path circlePath; 
         public ViewDrawPath(Context c) {
         	
 	        super(c);
