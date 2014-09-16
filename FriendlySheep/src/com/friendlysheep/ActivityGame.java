@@ -365,6 +365,7 @@ public class ActivityGame extends BaseGameActivity {
 
     		mPaths.add(new Path(mPath));
 	        mPath.reset();
+	        sheep  = addSprite(mScene, 250, 1000, sheepRegion);
 		    startTimerForRemove();
 	        
         }
