@@ -12,9 +12,10 @@ import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
 import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.anddev.andengine.entity.modifier.LoopEntityModifier;
 import org.anddev.andengine.entity.modifier.PathModifier;
+import org.anddev.andengine.entity.primitive.Line;
 import org.anddev.andengine.entity.scene.Scene;
+import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
 import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.scene.background.SpriteBackground;
 import org.anddev.andengine.entity.shape.Shape;
 import org.anddev.andengine.entity.text.ChangeableText;
 import org.anddev.andengine.entity.util.FPSLogger;
@@ -23,14 +24,14 @@ import org.anddev.andengine.extension.input.touch.controller.MultiTouchControlle
 import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
 import org.anddev.andengine.input.touch.TouchEvent;
 import org.anddev.andengine.opengl.font.Font;
-import org.anddev.andengine.opengl.texture.ITexture;
 import org.anddev.andengine.opengl.texture.TextureOptions;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.EmptyBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.FileBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
 import org.anddev.andengine.opengl.texture.atlas.bitmap.source.decorator.BaseBitmapTextureAtlasSourceDecorator;
+import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
+import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
 import org.anddev.andengine.ui.activity.BaseGameActivity;
 
 import com.qwerjk.andengine.entity.sprite.PixelPerfectAnimatedSprite;
@@ -45,9 +46,7 @@ import android.widget.Toast;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
@@ -61,7 +60,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout.LayoutParams;
 
-public class ActivityGame extends BaseGameActivity {
+public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListener{
 	
     // ===========================================================
     // Constants
@@ -83,32 +82,33 @@ public class ActivityGame extends BaseGameActivity {
     private Bitmap  mBitmap;
     private Font mFont;
     private Scene mScene;
+    private Engine mEngine;
     private Camera mCamera;
     private BitmapTextureAtlas mBulletTexture;
     private BitmapTextureAtlas mSheepTexture;
     private BitmapTextureAtlas mDrawingTexture;
     private PixelPerfectTextureRegion mSheepRegion;
-    private PixelPerfectTextureRegion mDrawingRegion;
     private PixelPerfectTiledTextureRegion mBulletRegion;
     
     private BitmapTextureAtlas mFontTexture;
 	private ArrayList<Shape> mBulletSprites;
 	private ArrayList<Shape> mTargetSprites;
 
-    private PixelPerfectSprite mDrawing;
     private PixelPerfectSprite mSheep;
     private ViewDrawPath mViewDrawPath;
-	private BitmapTextureAtlas mDrawingTextureAtlas;
 	private PixelPerfectTextureRegion mDrawingTextureRegion;
-    private FileBitmapTextureAtlasSource mFile;
-    
-	private BitmapTextureAtlas mBitmapTextureAtlas;
-	private ITexture mDecoratedBalloonTextureRegion;
-	private Paint transparentPaint;
-	
-	private IBitmapTextureAtlasSource baseTextureSource;
+    private IBitmapTextureAtlasSource mDrawingTextureSource;
 	private IBitmapTextureAtlasSource decoratedTextureAtlasSource;
 
+	private float mStartX = 0;
+    private float mStartY = 0;
+	private float mLastX = 0;
+	private float mLastY = 0;
+	private float mCurrentX = 0;
+	private float mCurrentY = 0;
+	private Line mCurrentLine;
+	private boolean mDrawing;
+	
 	@Override
 	public Engine onLoadEngine() {
 		
@@ -131,34 +131,36 @@ public class ActivityGame extends BaseGameActivity {
 	    }
 	
 		gameRunning();
+		this.mEngine = engine;
 	    return engine;
 	}
 	
 	@Override
 	public void onLoadResources() {
-	    PixelPerfectTextureRegionFactory.setAssetBasePath("gfx/");
+		PixelPerfectTextureRegionFactory.setAssetBasePath("gfx/");
 	    BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
 	
-	    this.mFontTexture = new BitmapTextureAtlas(256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	    mFontTexture = new BitmapTextureAtlas(256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 	
-	    this.mFont = new Font(this.mFontTexture, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), 48, true, Color.BLACK);
+	    mFont = new Font(this.mFontTexture, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), 48, true, Color.BLACK);
 	    
-	    this.mEngine.getTextureManager().loadTexture(this.mFontTexture);
-	    this.mEngine.getFontManager().loadFont(this.mFont);
+	    mEngine.getTextureManager().loadTexture(this.mFontTexture);
+	    mEngine.getFontManager().loadFont(this.mFont);
 	
 	    //create textures with minimum sizes
-
-	    this.mDrawingTexture = new BitmapTextureAtlas(2048, 2048, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-	    this.mBulletTexture = new BitmapTextureAtlas(2048, 128, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-	    this.mSheepTexture = new BitmapTextureAtlas(2048, 1024, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	    mDrawingTexture = new BitmapTextureAtlas(2048, 2048, TextureOptions.DEFAULT);
+	    mBulletTexture = new BitmapTextureAtlas(2048, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	    mSheepTexture = new BitmapTextureAtlas(1024, 1024, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 	   
-	    this.baseTextureSource = new EmptyBitmapTextureAtlasSource(mDisplayWidth, mDisplayHeight);
-	    
 	    //create regions and fetch bitmaps - add to texture
-	    this.mBulletRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mBulletTexture, this, "spinning-triangle.png", 0, 0, 20, 1);
-	    this.mSheepRegion = PixelPerfectTextureRegionFactory.createFromAsset(mSheepTexture, this, "sheep.png", 0, 0);
+	    mBulletRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mBulletTexture, this, "spinning-triangle.png", 0, 0, 20, 1);
+	    mSheepRegion = PixelPerfectTextureRegionFactory.createFromAsset(mSheepTexture, this, "sheep.png", 0, 0);
 	    
-	    this.mEngine.getTextureManager().loadTextures(this.mBulletTexture, this.mSheepTexture);
+	    //drawing source
+    	mDrawingTextureSource = new EmptyBitmapTextureAtlasSource(mDisplayWidth, mDisplayHeight);
+    	mDrawingTextureSource.onLoadBitmap(Bitmap.Config.ALPHA_8);
+    	
+	    mEngine.getTextureManager().loadTextures(mBulletTexture, mSheepTexture, mDrawingTexture);
 	}
 	
 	@Override
@@ -167,9 +169,10 @@ public class ActivityGame extends BaseGameActivity {
 		    
 	    mScene = new Scene(1);
 	    mScene.setBackground(new ColorBackground(0.09804f, 0.6274f, 0.8784f));
+		mScene.setOnSceneTouchListener(this);
 	
-	    mViewDrawPath = new ViewDrawPath(this);
-	    addContentView(mViewDrawPath, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+	    //mViewDrawPath = new ViewDrawPath(this);
+	    //addContentView(mViewDrawPath, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 	    
 	    mSheep  = addSprite(mScene, 250, 1000, mSheepRegion);  
 
@@ -189,7 +192,7 @@ public class ActivityGame extends BaseGameActivity {
 	        public void onUpdate(final float pSecondsElapsed) {
 	            for(Shape bullet : mBulletSprites){
 	    	            for(Shape target : mTargetSprites){
-		                    if(bullet.collidesWith(target)){
+		                    if(target != null && bullet.collidesWith(target)){
 		                    	Log("Removed item");
 		                        collisionText.setText("bam!");
 		                        bullet.detachSelf();
@@ -203,6 +206,54 @@ public class ActivityGame extends BaseGameActivity {
 	    });
 	
 	    return mScene;
+	}
+	
+    @Override
+	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
+
+			switch (pSceneTouchEvent.getAction()) {
+	        case MotionEvent.ACTION_DOWN:
+	    		Log("Down");
+	            mStartX = pSceneTouchEvent.getX();
+	            mStartY = pSceneTouchEvent.getY();
+	            mCurrentLine = new Line(mStartX, mStartY, mStartX,mStartY);
+	            mCurrentLine.setLineWidth(15);
+	            mCurrentLine.setColor(0, 0, 0, 0.4f);
+                mScene.attachChild(mCurrentLine);	 
+	        break;
+	        case MotionEvent.ACTION_MOVE: 
+	    		Log("Move");
+    			mDrawing = true;
+	    		mCurrentX = pSceneTouchEvent.getX();
+	            mCurrentY = pSceneTouchEvent.getY();
+    			mCurrentLine.setPosition(mStartX, mStartY, mCurrentX, mCurrentY);
+	        break;
+	        case MotionEvent.ACTION_UP:
+	    		Log("Up");
+	    		mCurrentLine.detachSelf();
+	            mLastX = pSceneTouchEvent.getX();
+	            mLastY = pSceneTouchEvent.getY();
+	            
+	            //define final line
+	            final Line insertLine = new Line(mStartX, mStartY, mLastX, mLastY);
+	            insertLine.setLineWidth(50);
+	            insertLine.setColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+                mScene.attachChild(insertLine);	  
+                mTargetSprites.add(insertLine);  
+	            
+            	final Handler handler = new Handler();
+    		    handler.postDelayed(new Runnable() { 
+    		    	@Override
+    		    	public void run() {
+    		    		insertLine.detachSelf();
+    	                mTargetSprites.remove(insertLine);  
+    		    		Log.i("DELAY", "-------------------------");
+    		    	}
+    		    }, 1000);
+	        break;
+	    }   
+	    return true;
 	}
 	
 	public void getDisplayInfo(){
@@ -309,7 +360,7 @@ public class ActivityGame extends BaseGameActivity {
 		    mPaint = new Paint();
 		    mPaint.setAntiAlias(true);
 		    mPaint.setDither(true);
-		    mPaint.setColor(Color.WHITE);
+		    mPaint.setColor(Color.BLACK);
 		    mPaint.setStyle(Paint.Style.STROKE);
 		    mPaint.setStrokeJoin(Paint.Join.ROUND);
 		    mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -317,21 +368,19 @@ public class ActivityGame extends BaseGameActivity {
 
 		    mPaintTransparent = new Paint();
 		    mPaintTransparent.setAntiAlias(true);
-		    mPaintTransparent.setDither(true); 
-		    mPaintTransparent.setColor(Color.BLACK);
-		    mPaintTransparent.setStyle(Paint.Style.STROKE);
+		    mPaintTransparent.setDither(true);
+		    mPaintTransparent.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+		    mPaintTransparent.setStrokeWidth(14);  
 		    mPaintTransparent.setStrokeJoin(Paint.Join.ROUND);
 		    mPaintTransparent.setStrokeCap(Paint.Cap.ROUND);
-		    mPaintTransparent.setStrokeWidth(14);  
+		    mPaintTransparent.setStyle(Paint.Style.STROKE);
         }
 
         @Override
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 	        super.onSizeChanged(w, h, oldw, oldh);
-				mBitmap = Bitmap.createBitmap(mDisplayWidth, mDisplayHeight, Bitmap.Config.ARGB_8888);
+				mBitmap = Bitmap.createBitmap(mDisplayWidth, mDisplayHeight, Bitmap.Config.ALPHA_8);
         		mCanvas = new Canvas(mBitmap);
-				transparentPaint = new Paint();
-        		 
         }
         @Override
         protected void onDraw(Canvas canvas) {
@@ -340,7 +389,6 @@ public class ActivityGame extends BaseGameActivity {
 			    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
 				canvas.drawPath( mPath,  mPaint);
 			    canvas.drawPath( circlePath,  circlePaint);
-	        	
 	        }
         }
 
@@ -376,19 +424,17 @@ public class ActivityGame extends BaseGameActivity {
 	   		mPaths.add(new Path(mPath));
 	        mPath.reset();
 		    startTimerForRemove();
-	        
-		    
-		    addDrawing();
-		    
+		    //addDrawing();
 		    
         }
         
+        
         private void addDrawing(){
-    		
-    		decoratedTextureAtlasSource = new BaseBitmapTextureAtlasSourceDecorator(baseTextureSource) {
+
+    		decoratedTextureAtlasSource = new BaseBitmapTextureAtlasSourceDecorator(mDrawingTextureSource) {
     			@Override
     			protected void onDecorateBitmap(Canvas pCanvas) {
-    				pCanvas.drawBitmap(mBitmap, 0, 0, mPaint);
+    				pCanvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
     			}
     			
 				@Override
@@ -397,11 +443,10 @@ public class ActivityGame extends BaseGameActivity {
 					return null;
 				}  
     		};
-
-    		mDrawingTextureRegion = PixelPerfectTextureRegionFactory.createFromSource(mDrawingTexture, decoratedTextureAtlasSource, 0, 0);       	
-    	    mDrawing  = addSprite(mScene, 0, 0, mDrawingTextureRegion); 
-    		mTargetSprites.add(mDrawing);
-    		mScene.setBackground(new SpriteBackground(mDrawing));
+        	decoratedTextureAtlasSource.onLoadBitmap(Bitmap.Config.ALPHA_8);
+    		mDrawingTextureRegion = PixelPerfectTextureRegionFactory.createFromSource(mDrawingTexture, decoratedTextureAtlasSource, 0, 0);
+        	mTargetSprites.add(addDrawingSprite(mScene, mDrawingTextureRegion));
+        	
         }
         
         private void startTimerForRemove(){
@@ -409,11 +454,12 @@ public class ActivityGame extends BaseGameActivity {
 		    handler.postDelayed(new Runnable() { 
 		    	@Override
 		    	public void run() {
-			    	mCanvas.drawPath( mPaths.remove(0),  mPaintTransparent);
+			    	//mCanvas.drawPath( mPaths.remove(0),  mPaintTransparent);
+		        	//mTargetSprites.remove(1);
 			    	invalidate();
 		    		Log.i("DELAY", "-------------------------");
 		    	}
-		    }, 1500);
+		    }, 7000);
         }
 
         @SuppressLint("ClickableViewAccessibility") @Override
@@ -461,31 +507,15 @@ public class ActivityGame extends BaseGameActivity {
 	} 
 	
 	private PixelPerfectSprite addSprite(final Scene scene, final int x, final int y, final PixelPerfectTextureRegion region){
-	    PixelPerfectSprite sprite = new PixelPerfectSprite(x,y,region){
-	        boolean mGrabbed = false;
-	        
-	        @Override
-	        public boolean onAreaTouched(final TouchEvent pSceneTouchEvent, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-	            switch(pSceneTouchEvent.getAction()) {
-	                case TouchEvent.ACTION_DOWN:
-	                    this.mGrabbed = true;
-	                    break;
-	                case TouchEvent.ACTION_MOVE:
-	                    if(this.mGrabbed) {
-	                        this.setPosition(pSceneTouchEvent.getX() - this.getWidth() / 2, pSceneTouchEvent.getY() - this.getHeight() / 2);
-	                    }
-	                    break;
-	                case TouchEvent.ACTION_UP:
-	                    if(this.mGrabbed) {
-	                        this.mGrabbed = false;
-	                    }
-	                    break;
-	            }
-	            return true;
-	        }
-	    };
+	    PixelPerfectSprite sprite = new PixelPerfectSprite(x,y,region);
 	    scene.attachChild(sprite);
 	    scene.registerTouchArea(sprite);
+	    return sprite;
+	}
+	
+	private PixelPerfectSprite addDrawingSprite(final Scene scene, final PixelPerfectTextureRegion region){
+	    PixelPerfectSprite sprite = new PixelPerfectSprite(0,0,region);
+	    scene.attachChild(sprite);
 	    return sprite;
 	}
 	
@@ -496,5 +526,5 @@ public class ActivityGame extends BaseGameActivity {
 		gameRunning();
 		
 	}
-	
+
 }
