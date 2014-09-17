@@ -2,6 +2,8 @@ package com.friendlysheep;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 import org.anddev.andengine.engine.Engine;
@@ -54,6 +56,7 @@ import android.graphics.Point;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
@@ -68,6 +71,8 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 
     private static int CAMERA_WIDTH;
     private static int CAMERA_HEIGHT;
+    private int score = 0;
+    private TimerTask scoreTimer;
 
     // ===========================================================
     // Fields
@@ -181,8 +186,12 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	    
 	    mTargetSprites.add(mSheep);
 	    
+	    
+	    final ChangeableText scoreText = new ChangeableText(CAMERA_WIDTH/2, 50, this.mFont, "Score: " + score + "  ");
 	    final ChangeableText collisionText = new ChangeableText(0, 0, this.mFont, "no collisions");
+	    mScene.attachChild(scoreText);
 	    mScene.attachChild(collisionText);
+	    
 	    /* The actual collision-checking. */
 	    mScene.registerUpdateHandler(new IUpdateHandler() {
 	        @Override
@@ -193,6 +202,13 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	            for(Shape bullet : mBulletSprites){
 	    	            for(Shape target : mTargetSprites){
 		                    if(target != null && bullet.collidesWith(target)){
+		                    	if(target!=mSheep){
+		                    		score++;
+		                    		scoreText.setText("Score: " + score + "");		                    		
+		                    	}
+		                    	else{
+		                    		scoreText.setText("GAME OVER! Score: " + score);
+		                    	}
 		                    	Log("Removed item");
 		                        collisionText.setText("bam!");
 		                        bullet.detachSelf();
@@ -204,7 +220,7 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	            collisionText.setText(""); 
 	        }
 	    });
-	
+	    
 	    return mScene;
 	}
 	
@@ -276,7 +292,7 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 		newAnimation();
 		
 	}
-	
+
 	public void newAnimation(){
 		
 		final Handler h = new Handler();
