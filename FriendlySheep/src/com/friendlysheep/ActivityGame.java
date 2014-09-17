@@ -44,9 +44,13 @@ import com.qwerjk.andengine.opengl.texture.region.PixelPerfectTiledTextureRegion
 import android.graphics.Color;
 import android.graphics.Typeface;
 
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -61,6 +65,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.RelativeLayout.LayoutParams;
 
 public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListener{
@@ -83,6 +88,10 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	private Paint mPaintTransparent;
 	private int mDisplayWidth;
 	private int mDisplayHeight;
+	private Boolean alive = true, once = true;
+	private Dialog gameOver;
+	private final Context context = this;
+	private Runnable runnable;
 
     private Bitmap  mBitmap;
     private Font mFont;
@@ -134,8 +143,10 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	    } catch (final MultiTouchException e) {
 	        Toast.makeText(this, "Sorry your Android Version does NOT support MultiTouch!\n\n(Falling back to SingleTouch.)\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
 	    }
+	    
+	    gameRunning();	    	
+
 	
-		gameRunning();
 		this.mEngine = engine;
 	    return engine;
 	}
@@ -207,7 +218,8 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 		                    		scoreText.setText("Score: " + score + "");		                    		
 		                    	}
 		                    	else{
-		                    		scoreText.setText("GAME OVER! Score: " + score);
+		                    		scoreText.setText("GAME OVER!");
+		                    		alive = false;
 		                    	}
 		                    	Log("Removed item");
 		                        collisionText.setText("bam!");
@@ -295,16 +307,56 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 
 	public void newAnimation(){
 		
+		
 		final Handler h = new Handler();
 		final int delay = mRandom.nextInt(5000 - 2000) + 2000; //milliseconds 
 
-		h.postDelayed(new Runnable(){
+		h.postDelayed(runnable = new Runnable(){
 		    public void run(){
-		    	newSprite();
-		        h.postDelayed(this, delay);
+		    	if(alive){
+		    		newSprite();
+		    		h.postDelayed(this, delay);		    		
+		    	}
+		    	else if (!alive && once){
+		    		once = false;
+		    		stop();
+		    		//Removes all "in action" bullets
+		    		for(Shape bullet : mBulletSprites){
+		    			bullet.detachSelf();
+		    		}
+		    	}
+		    }
+		    
+		    public void stop(){
+		    	
+		    	onStop(h, runnable);
+		    	//Creates the popup window
+		    	gameOver = new Dialog(context);
+	          	gameOver.setContentView(R.layout.game_over_view);
+	          	gameOver.setTitle("Game Over");
+		    	TextView tv_gameOver = (TextView) gameOver.findViewById(R.id.tv_gameOver);
+		    	tv_gameOver.setText("What a shame! The sheep is shaved.\nYour score: " + score);
+		    	
+		    	gameOver.show();
+		    	Button b_restart = (Button) gameOver.findViewById(R.id.b_restart);
+		    	b_restart.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+    					startActivity(new Intent(ActivityGame.this, ActivityGame.class));
+
+						
+					}
+				});
 		    }
 		}, delay);		
 		
+	}
+	protected void onStop(Handler handler, Runnable runnable) {
+		//To stop the handler (the timer)
+		super.onStop();
+		handler.removeCallbacks(runnable);
 	}
 	
 	public void newSprite(){
@@ -346,6 +398,12 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	
 	private void Log(String log){
 		Log.i("ActivityGame", log);
+	}
+	
+	@Override
+	public void onBackPressed(){
+		Log.i("onback","pressed");
+		startActivity(new Intent(this, ActivityMenu.class));
 	}
 	
 	public class ViewDrawPath extends View {
