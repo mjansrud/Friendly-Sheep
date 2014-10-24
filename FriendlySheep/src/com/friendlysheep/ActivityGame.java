@@ -100,7 +100,8 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
     private Camera mCamera;
     private BitmapTextureAtlas mBulletTexture;
     private BitmapTextureAtlas mSheepTexture;
-    private BitmapTextureAtlas mDrawingTexture;
+    private BitmapTextureAtlas mShieldTexture;
+    private PixelPerfectTextureRegion mShieldRegion;
     private PixelPerfectTextureRegion mSheepRegion;
     private PixelPerfectTiledTextureRegion mBulletRegion;
     
@@ -108,20 +109,12 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	private ArrayList<Shape> mBulletSprites;
 	private ArrayList<Shape> mTargetSprites;
 
+    private PixelPerfectSprite mShield;
     private PixelPerfectSprite mSheep;
-    private ViewDrawPath mViewDrawPath;
 	private PixelPerfectTextureRegion mDrawingTextureRegion;
     private IBitmapTextureAtlasSource mDrawingTextureSource;
 	private IBitmapTextureAtlasSource decoratedTextureAtlasSource;
-
-	private float mStartX = 0;
-    private float mStartY = 0;
-	private float mLastX = 0;
-	private float mLastY = 0;
-	private float mCurrentX = 0;
-	private float mCurrentY = 0;
-	private Line mCurrentLine;
-	private boolean mDrawing;
+s
 	
 	@Override
 	public Engine onLoadEngine() {
@@ -164,19 +157,20 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	    mEngine.getFontManager().loadFont(this.mFont);
 	
 	    //create textures with minimum sizes
-	    mDrawingTexture = new BitmapTextureAtlas(2048, 2048, TextureOptions.DEFAULT);
+	    mShieldTexture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
 	    mBulletTexture = new BitmapTextureAtlas(2048, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 	    mSheepTexture = new BitmapTextureAtlas(1024, 1024, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
 	   
 	    //create regions and fetch bitmaps - add to texture
 	    mBulletRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mBulletTexture, this, "spinning-triangle.png", 0, 0, 20, 1);
 	    mSheepRegion = PixelPerfectTextureRegionFactory.createFromAsset(mSheepTexture, this, "sheep.png", 0, 0);
+	    mShieldRegion = PixelPerfectTextureRegionFactory.createFromAsset(mShieldTexture, this, "shield.png", 0, 0);
 	    
 	    //drawing source
     	mDrawingTextureSource = new EmptyBitmapTextureAtlasSource(mDisplayWidth, mDisplayHeight);
     	mDrawingTextureSource.onLoadBitmap(Bitmap.Config.ALPHA_8);
     	
-	    mEngine.getTextureManager().loadTextures(mBulletTexture, mSheepTexture, mDrawingTexture);
+	    mEngine.getTextureManager().loadTextures(mBulletTexture, mSheepTexture, mShieldTexture);
 	}
 	
 	@Override
@@ -200,6 +194,7 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	    
 	    final ChangeableText scoreText = new ChangeableText(CAMERA_WIDTH/2, 50, this.mFont, "Score: " + score + "  ");
 	    final ChangeableText collisionText = new ChangeableText(0, 0, this.mFont, "no collisions");
+	    
 	    mScene.attachChild(scoreText);
 	    mScene.attachChild(collisionText);
 	    
@@ -212,8 +207,11 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	        public void onUpdate(final float pSecondsElapsed) {
 	            for(Shape bullet : mBulletSprites){
 	    	            for(Shape target : mTargetSprites){
-		                    if(target != null && bullet.collidesWith(target)){
-		                    	if(target!=mSheep){
+		                    if(bullet != null && target != null && bullet.collidesWith(target)){
+		                    	
+		                        collisionText.setText("bam!");
+		                        
+		                    	if(target != mSheep){
 		                    		score++;
 		                    		scoreText.setText("Score: " + score + "");		                    		
 		                    	}
@@ -221,10 +219,10 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 		                    		scoreText.setText("GAME OVER!");
 		                    		alive = false;
 		                    	}
+		                    	
 		                    	Log("Removed item");
-		                        collisionText.setText("bam!");
-		                        bullet.detachSelf();
 		                        mBulletSprites.remove(bullet);
+		                        bullet.detachSelf();
 		                        return;
 		                    }
 	                }
@@ -242,40 +240,23 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 			switch (pSceneTouchEvent.getAction()) {
 	        case MotionEvent.ACTION_DOWN:
 	    		Log("Down");
-	            mStartX = pSceneTouchEvent.getX();
-	            mStartY = pSceneTouchEvent.getY();
-	            mCurrentLine = new Line(mStartX, mStartY, mStartX,mStartY);
-	            mCurrentLine.setLineWidth(15);
-	            mCurrentLine.setColor(0, 0, 0, 0.4f);
-                mScene.attachChild(mCurrentLine);	 
+	    	    mSheep  = addSprite(mScene, 250, 1000, mShieldRegion);   
 	        break;
 	        case MotionEvent.ACTION_MOVE: 
 	    		Log("Move");
-    			mDrawing = true;
-	    		mCurrentX = pSceneTouchEvent.getX();
-	            mCurrentY = pSceneTouchEvent.getY();
-    			mCurrentLine.setPosition(mStartX, mStartY, mCurrentX, mCurrentY);
 	        break;
 	        case MotionEvent.ACTION_UP:
 	    		Log("Up");
-	    		mCurrentLine.detachSelf();
-	            mLastX = pSceneTouchEvent.getX();
-	            mLastY = pSceneTouchEvent.getY();
-	            
-	            //define final line
-	            final Line insertLine = new Line(mStartX, mStartY, mLastX, mLastY);
-	            insertLine.setLineWidth(50);
-	            insertLine.setColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-                mScene.attachChild(insertLine);	  
-                mTargetSprites.add(insertLine);  
+                mScene.attachChild(mSheep);	  
+                mTargetSprites.add(mSheep);  
 	            
             	final Handler handler = new Handler();
     		    handler.postDelayed(new Runnable() { 
     		    	@Override
     		    	public void run() {
-    		    		insertLine.detachSelf();
-    	                mTargetSprites.remove(insertLine);  
+    	                mTargetSprites.remove(mSheep);
+    		    		mSheep.detachSelf();  
     		    		Log.i("DELAY", "-------------------------");
     		    	}
     		    }, 1000);
@@ -405,164 +386,7 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 		Log.i("onback","pressed");
 		startActivity(new Intent(this, ActivityMenu.class));
 	}
-	
-	public class ViewDrawPath extends View {
 
-        public int width;
-        public  int height;
-        private ArrayList<Path> mPaths = new ArrayList<Path>();
-        private Canvas  mCanvas;
-        private Path    mPath;
-        private Paint   mBitmapPaint;
-        Context context;
-        private Paint circlePaint;
-        private Path circlePath; 
-        public ViewDrawPath(Context c) {
-        	
-	        super(c);
-	        context=c;
-	        mPath = new Path();
-	        mBitmapPaint = new Paint(Paint.DITHER_FLAG);  
-	        circlePaint = new Paint();
-	        circlePath = new Path();
-	        circlePaint.setAntiAlias(true);
-	        circlePaint.setColor(Color.BLUE);
-	        circlePaint.setStyle(Paint.Style.STROKE);
-	        circlePaint.setStrokeJoin(Paint.Join.MITER);
-	        circlePaint.setStrokeWidth(4f);
-	        
-		    mPaint = new Paint();
-		    mPaint.setAntiAlias(true);
-		    mPaint.setDither(true);
-		    mPaint.setColor(Color.BLACK);
-		    mPaint.setStyle(Paint.Style.STROKE);
-		    mPaint.setStrokeJoin(Paint.Join.ROUND);
-		    mPaint.setStrokeCap(Paint.Cap.ROUND);
-		    mPaint.setStrokeWidth(12);  
-
-		    mPaintTransparent = new Paint();
-		    mPaintTransparent.setAntiAlias(true);
-		    mPaintTransparent.setDither(true);
-		    mPaintTransparent.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
-		    mPaintTransparent.setStrokeWidth(14);  
-		    mPaintTransparent.setStrokeJoin(Paint.Join.ROUND);
-		    mPaintTransparent.setStrokeCap(Paint.Cap.ROUND);
-		    mPaintTransparent.setStyle(Paint.Style.STROKE);
-        }
-
-        @Override
-        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-	        super.onSizeChanged(w, h, oldw, oldh);
-				mBitmap = Bitmap.createBitmap(mDisplayWidth, mDisplayHeight, Bitmap.Config.ALPHA_8);
-        		mCanvas = new Canvas(mBitmap);
-        }
-        @Override
-        protected void onDraw(Canvas canvas) {
-        	super.onDraw(canvas);
-	        if(mBitmap != null){
-			    canvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
-				canvas.drawPath( mPath,  mPaint);
-			    canvas.drawPath( circlePath,  circlePaint);
-	        }
-        }
-
-        private float mX, mY;
-        private static final float TOUCH_TOLERANCE = 4;
-
-        private void touch_start(float x, float y) {
-        	
-	        mPath.reset();
-	        mPath.moveTo(x, y);
-	        mX = x;
-	        mY = y;
-        }
-        
-        private void touch_move(float x, float y) {
-	        float dx = Math.abs(x - mX);
-	        float dy = Math.abs(y - mY);
-	        
-	        if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-	            mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
-	            mX = x;
-	            mY = y;
-		        mCanvas.drawPath(mPath,  mPaint);
-	            circlePath.reset();
-	            circlePath.addCircle(mX, mY, 30, Path.Direction.CW);
-	        }
-        }
-        private void touch_up() {
-        	
-	        circlePath.reset();
-	        mCanvas.drawPath(mPath,  mPaint);
-
-	   		mPaths.add(new Path(mPath));
-	        mPath.reset();
-		    startTimerForRemove();
-		    //addDrawing();
-		    
-        }
-        
-        
-        private void addDrawing(){
-
-    		decoratedTextureAtlasSource = new BaseBitmapTextureAtlasSourceDecorator(mDrawingTextureSource) {
-    			@Override
-    			protected void onDecorateBitmap(Canvas pCanvas) {
-    				pCanvas.drawBitmap( mBitmap, 0, 0, mBitmapPaint);
-    			}
-    			
-				@Override
-				public BaseBitmapTextureAtlasSourceDecorator clone() {
-					// TODO Auto-generated method stub
-					return null;
-				}  
-    		};
-        	decoratedTextureAtlasSource.onLoadBitmap(Bitmap.Config.ALPHA_8);
-    		mDrawingTextureRegion = PixelPerfectTextureRegionFactory.createFromSource(mDrawingTexture, decoratedTextureAtlasSource, 0, 0);
-        	mTargetSprites.add(addDrawingSprite(mScene, mDrawingTextureRegion));
-        	
-        }
-        
-        private void startTimerForRemove(){
-        	final Handler handler = new Handler();
-		    handler.postDelayed(new Runnable() { 
-		    	@Override
-		    	public void run() {
-			    	//mCanvas.drawPath( mPaths.remove(0),  mPaintTransparent);
-		        	//mTargetSprites.remove(1);
-			    	invalidate();
-		    		Log.i("DELAY", "-------------------------");
-		    	}
-		    }, 7000);
-        }
-
-        @SuppressLint("ClickableViewAccessibility") @Override
-        public boolean onTouchEvent(MotionEvent event) {
-	        float x = event.getX();
-	        float y = event.getY();
-	
-	        switch (event.getAction()) {
-	            case MotionEvent.ACTION_DOWN:
-				touch_start(x, y);
-	                invalidate();
-	                break;
-	            case MotionEvent.ACTION_MOVE:
-	    	        PathMeasure mPm = new PathMeasure(mPath, true);
-	            	if(mPm.getLength() <= 150){
-	            		touch_move(x, y); 
-	            	}
-            		invalidate();
-	                break;
-	            case MotionEvent.ACTION_UP:
-	                touch_up();
-	                invalidate();
-	                break;
-	        }
-        return true;
-        }
-        
-        
-    }
 	
 	private PixelPerfectAnimatedSprite addAnimatedSprite(final Scene scene, final int x, final int y, final int speed, final PixelPerfectTiledTextureRegion region){
 	   
@@ -587,11 +411,6 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	    return sprite;
 	}
 	
-	private PixelPerfectSprite addDrawingSprite(final Scene scene, final PixelPerfectTextureRegion region){
-	    PixelPerfectSprite sprite = new PixelPerfectSprite(0,0,region);
-	    scene.attachChild(sprite);
-	    return sprite;
-	}
 	
 	@Override
 	public void onLoadComplete() {
