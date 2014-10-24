@@ -114,7 +114,7 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 	private PixelPerfectTextureRegion mDrawingTextureRegion;
     private IBitmapTextureAtlasSource mDrawingTextureSource;
 	private IBitmapTextureAtlasSource decoratedTextureAtlasSource;
-s
+
 	
 	@Override
 	public Engine onLoadEngine() {
