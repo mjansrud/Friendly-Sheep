@@ -2,71 +2,48 @@ package com.friendlysheep;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import org.andengine.engine.camera.Camera;
+import org.andengine.engine.handler.IUpdateHandler;
+import org.andengine.engine.options.EngineOptions;
+import org.andengine.engine.options.ScreenOrientation;
+import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.LoopEntityModifier;
+import org.andengine.entity.modifier.PathModifier;
+import org.andengine.entity.scene.IOnSceneTouchListener;
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.scene.background.IBackground;
+import org.andengine.entity.util.FPSLogger;
+import org.andengine.input.touch.TouchEvent;
+import org.andengine.opengl.font.Font;
+import org.andengine.opengl.texture.TextureOptions;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
+import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.ui.activity.BaseGameActivity;
+import com.makersf.andengine.extension.collisions.entity.sprite.PixelPerfectAnimatedSprite;
+import com.makersf.andengine.extension.collisions.opengl.texture.region.PixelPerfectTextureRegionFactory;
+import com.makersf.andengine.extension.collisions.opengl.texture.region.PixelPerfectTiledTextureRegion;
 
 
-import org.anddev.andengine.engine.Engine;
-import org.anddev.andengine.engine.camera.Camera;
-import org.anddev.andengine.engine.handler.IUpdateHandler;
-import org.anddev.andengine.engine.options.EngineOptions;
-import org.anddev.andengine.engine.options.EngineOptions.ScreenOrientation;
-import org.anddev.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
-import org.anddev.andengine.entity.modifier.LoopEntityModifier;
-import org.anddev.andengine.entity.modifier.PathModifier;
-import org.anddev.andengine.entity.primitive.Line;
-import org.anddev.andengine.entity.scene.Scene;
-import org.anddev.andengine.entity.scene.Scene.IOnSceneTouchListener;
-import org.anddev.andengine.entity.scene.background.ColorBackground;
-import org.anddev.andengine.entity.shape.Shape;
-import org.anddev.andengine.entity.text.ChangeableText;
-import org.anddev.andengine.entity.util.FPSLogger;
-import org.anddev.andengine.extension.input.touch.controller.MultiTouch;
-import org.anddev.andengine.extension.input.touch.controller.MultiTouchController;
-import org.anddev.andengine.extension.input.touch.exception.MultiTouchException;
-import org.anddev.andengine.input.touch.TouchEvent;
-import org.anddev.andengine.opengl.font.Font;
-import org.anddev.andengine.opengl.texture.TextureOptions;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.EmptyBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.IBitmapTextureAtlasSource;
-import org.anddev.andengine.opengl.texture.atlas.bitmap.source.decorator.BaseBitmapTextureAtlasSourceDecorator;
-import org.anddev.andengine.sensor.accelerometer.AccelerometerData;
-import org.anddev.andengine.sensor.accelerometer.IAccelerometerListener;
-import org.anddev.andengine.ui.activity.BaseGameActivity;
-
-import com.qwerjk.andengine.entity.sprite.PixelPerfectAnimatedSprite;
-import com.qwerjk.andengine.entity.sprite.PixelPerfectSprite;
-import com.qwerjk.andengine.opengl.texture.region.PixelPerfectTextureRegion;
-import com.qwerjk.andengine.opengl.texture.region.PixelPerfectTextureRegionFactory;
-import com.qwerjk.andengine.opengl.texture.region.PixelPerfectTiledTextureRegion;
 import android.graphics.Color;
 import android.graphics.Typeface;
 
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.Point;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.RelativeLayout.LayoutParams;
 
 public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListener{
 	
@@ -76,241 +53,234 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 
     private static int CAMERA_WIDTH;
     private static int CAMERA_HEIGHT;
+	private static final int ALPHA_THERSHOLD = 0;
     private int score = 0;
-    private TimerTask scoreTimer;
+    
 
     // ===========================================================
     // Fields
     // ===========================================================
 
     private Random mRandom;
-	private Paint mPaint;
-	private Paint mPaintTransparent;
 	private int mDisplayWidth;
 	private int mDisplayHeight;
 	private Boolean alive = true, once = true;
 	private Dialog gameOver;
-	private final Context context = this;
+	private Context context = this;
 	private Runnable runnable;
 
-    private Bitmap  mBitmap;
     private Font mFont;
     private Scene mScene;
-    private Engine mEngine;
     private Camera mCamera;
     private BitmapTextureAtlas mBulletTexture;
     private BitmapTextureAtlas mSheepTexture;
     private BitmapTextureAtlas mShieldTexture;
-    private PixelPerfectTextureRegion mShieldRegion;
-    private PixelPerfectTextureRegion mSheepRegion;
+    private PixelPerfectTiledTextureRegion mShieldRegion;
     private PixelPerfectTiledTextureRegion mBulletRegion;
-    
+    private PixelPerfectTiledTextureRegion mSheepRegion;
+    private VertexBufferObjectManager VBOmanager;
     private BitmapTextureAtlas mFontTexture;
-	private ArrayList<Shape> mBulletSprites;
-	private ArrayList<Shape> mTargetSprites;
+	private ArrayList<PixelPerfectAnimatedSprite> mTrashSprites;
+	private ArrayList<PixelPerfectAnimatedSprite> mBulletSprites;
+	private ArrayList<PixelPerfectAnimatedSprite> mShieldSprites;
 
-    private PixelPerfectSprite mShield;
-    private PixelPerfectSprite mSheep;
-	private PixelPerfectTextureRegion mDrawingTextureRegion;
-    private IBitmapTextureAtlasSource mDrawingTextureSource;
-	private IBitmapTextureAtlasSource decoratedTextureAtlasSource;
+    private PixelPerfectAnimatedSprite mSheep;
+  
 
-	
-	@Override
-	public Engine onLoadEngine() {
+
+	@Override 
+	public EngineOptions onCreateEngineOptions() {
+		// TODO Auto-generated method stub
 		
-	    //log game started
+		 //log game started
 		Log("Engine loaded");
 		mRandom = new Random();
 		getDisplayInfo();
 		
 	    this.mCamera = new Camera(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
-	    final Engine engine = new Engine(new EngineOptions(true, ScreenOrientation.PORTRAIT, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera));
-	
-	    try {
-	        if(MultiTouch.isSupported(this)) {
-	            engine.setTouchController(new MultiTouchController());
-	        } else {
-	            Toast.makeText(this, "Sorry your device does NOT support MultiTouch!\n\n(Falling back to SingleTouch.)\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
-	        }
-	    } catch (final MultiTouchException e) {
-	        Toast.makeText(this, "Sorry your Android Version does NOT support MultiTouch!\n\n(Falling back to SingleTouch.)\n\nControls are placed at different vertical locations.", Toast.LENGTH_LONG).show();
-	    }
-	    
 	    gameRunning();	    	
 
-	
-		this.mEngine = engine;
-	    return engine;
+		return new EngineOptions(true, ScreenOrientation.PORTRAIT_FIXED, new RatioResolutionPolicy(CAMERA_WIDTH, CAMERA_HEIGHT), this.mCamera);
+
 	}
-	
+
+
 	@Override
-	public void onLoadResources() {
-		PixelPerfectTextureRegionFactory.setAssetBasePath("gfx/");
-	    BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
-	
-	    mFontTexture = new BitmapTextureAtlas(256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-	
-	    mFont = new Font(this.mFontTexture, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), 48, true, Color.BLACK);
+	public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) {
+		// TODO Auto-generated method stub
+		
+		mEngine.registerUpdateHandler(new FPSLogger());
+		VBOmanager = this.getVertexBufferObjectManager();
 	    
-	    mEngine.getTextureManager().loadTexture(this.mFontTexture);
-	    mEngine.getFontManager().loadFont(this.mFont);
-	
-	    //create textures with minimum sizes
-	    mShieldTexture = new BitmapTextureAtlas(1024, 1024, TextureOptions.DEFAULT);
-	    mBulletTexture = new BitmapTextureAtlas(2048, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-	    mSheepTexture = new BitmapTextureAtlas(1024, 1024, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
-	   
-	    //create regions and fetch bitmaps - add to texture
-	    mBulletRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mBulletTexture, this, "spinning-triangle.png", 0, 0, 20, 1);
-	    mSheepRegion = PixelPerfectTextureRegionFactory.createFromAsset(mSheepTexture, this, "sheep.png", 0, 0);
-	    mShieldRegion = PixelPerfectTextureRegionFactory.createFromAsset(mShieldTexture, this, "shield.png", 0, 0);
-	    
-	    //drawing source
-    	mDrawingTextureSource = new EmptyBitmapTextureAtlasSource(mDisplayWidth, mDisplayHeight);
-    	mDrawingTextureSource.onLoadBitmap(Bitmap.Config.ALPHA_8);
-    	
-	    mEngine.getTextureManager().loadTextures(mBulletTexture, mSheepTexture, mShieldTexture);
-	}
-	
-	@Override
-	public Scene onLoadScene() {
-	    this.mEngine.registerUpdateHandler(new FPSLogger());
-		    
-	    mScene = new Scene(1);
-	    mScene.setBackground(new ColorBackground(0.09804f, 0.6274f, 0.8784f));
+	    mScene = new Scene();
+		mScene.setBackground(new Background(0.09804f, 0.6274f, 0.8784f));
 		mScene.setOnSceneTouchListener(this);
 	
 	    //mViewDrawPath = new ViewDrawPath(this);
 	    //addContentView(mViewDrawPath, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 	    
-	    mSheep  = addSprite(mScene, 250, 1000, mSheepRegion);  
+		mSheep = addSheepSprite(mScene, 500, 650, mSheepRegion);
 
-	    mBulletSprites = new ArrayList<Shape>();
-	    mTargetSprites = new ArrayList<Shape>();
+	    mTrashSprites = new ArrayList<PixelPerfectAnimatedSprite>();
+	    mBulletSprites = new ArrayList<PixelPerfectAnimatedSprite>();
+	    mShieldSprites = new ArrayList<PixelPerfectAnimatedSprite>();
 	    
-	    mTargetSprites.add(mSheep);
+	    mShieldSprites.add(mSheep);
 	    
+		pOnCreateSceneCallback.onCreateSceneFinished(mScene);
+	}
+	
+	@Override
+	public void onCreateResources(
+			OnCreateResourcesCallback pOnCreateResourcesCallback) {
+		// TODO Auto-generated method stub
+		
+		PixelPerfectTextureRegionFactory.setAssetBasePath("gfx/");
+	    BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/");
+	
+	    mFontTexture = new BitmapTextureAtlas(getTextureManager(),256, 256, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	
+	    mFont = new Font(getFontManager(), this.mFontTexture, Typeface.create(Typeface.DEFAULT, Typeface.BOLD), 48, true, Color.BLACK);
 	    
-	    final ChangeableText scoreText = new ChangeableText(CAMERA_WIDTH/2, 50, this.mFont, "Score: " + score + "  ");
-	    final ChangeableText collisionText = new ChangeableText(0, 0, this.mFont, "no collisions");
+	
+	    //create textures with minimum sizes
+        mShieldTexture = new BitmapTextureAtlas(getTextureManager(), 1024, 1024, TextureOptions.DEFAULT);
+	    mBulletTexture = new BitmapTextureAtlas(getTextureManager(), 2048, 512, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	    mSheepTexture = new BitmapTextureAtlas(getTextureManager(), 1024, 1024, TextureOptions.BILINEAR_PREMULTIPLYALPHA);
+	   
+	    //create regions and fetch bitmaps - add to texture
+	    mSheepRegion  = PixelPerfectTextureRegionFactory.createTiledFromAsset(mSheepTexture,  this.getAssets(), "sheep.png", 0, 0, 1, 1, ALPHA_THERSHOLD);
+	    mShieldRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mShieldTexture, this.getAssets(), "shield.png", 0, 0, 1, 1, ALPHA_THERSHOLD);
+	    mBulletRegion = PixelPerfectTextureRegionFactory.createTiledFromAsset(mBulletTexture, this.getAssets(), "spinning-triangle.png", 0, 0, 20, 1, ALPHA_THERSHOLD);
 	    
-	    mScene.attachChild(scoreText);
-	    mScene.attachChild(collisionText);
+	    mShieldTexture.load();
+	    mBulletTexture.load();
+	    mSheepTexture.load();
 	    
-	    /* The actual collision-checking. */
-	    mScene.registerUpdateHandler(new IUpdateHandler() {
+		pOnCreateResourcesCallback.onCreateResourcesFinished();
+	}
+
+	@Override
+	public void onPopulateScene(Scene pScene,
+			OnPopulateSceneCallback pOnPopulateSceneCallback) {
+			// TODO Auto-generated method stub
+		
+			/* The actual collision-checking. */
+			mScene.registerUpdateHandler(new IUpdateHandler() {
 	        @Override
 	        public void reset() { } 
 	
 	        @Override
 	        public void onUpdate(final float pSecondsElapsed) {
-	            for(Shape bullet : mBulletSprites){
-	    	            for(Shape target : mTargetSprites){
-		                    if(bullet != null && target != null && bullet.collidesWith(target)){
-		                    	
-		                        collisionText.setText("bam!");
-		                        
-		                    	if(target != mSheep){
-		                    		score++;
-		                    		scoreText.setText("Score: " + score + "");		                    		
-		                    	}
-		                    	else{
-		                    		scoreText.setText("GAME OVER!");
-		                    		alive = false;
-		                    	}
-		                    	
-		                    	Log("Removed item");
+	        	 
+
+	     
+	        	   for(PixelPerfectAnimatedSprite trash : mTrashSprites){
+	        		   
+	        		   mTrashSprites.remove(trash);
+	        		   trash.detachSelf();
+	        		   
+	        	   }
+	        		
+	    	       for(PixelPerfectAnimatedSprite shield : mShieldSprites){
+	    		          for(PixelPerfectAnimatedSprite bullet : mBulletSprites){
+	    	
+		                    if(bullet.collidesWith(shield)){
+		        	        	
+		                        Log("Collision!");
 		                        mBulletSprites.remove(bullet);
 		                        bullet.detachSelf();
-		                        return;
+		                        
+		                    	if(shield != mSheep){
+		                    		score++;
+		                    		Log("Score: " + score + "");		                    		
+		                    	}
+		                    	else{
+		                    		Log("GAME OVER!");
+		                    		alive = false;
+		                    		
+	        			    		deadMenu();
+	        			    		//Removes all "in action" bullets
+	        			    		for(PixelPerfectAnimatedSprite trash : mBulletSprites){
+	        			    			trash.detachSelf();
+	        			    		}
+		        			    	
+		                    	}
+		                    	
+		                        break;
 		                    }
 	                }
-	            }
-	            collisionText.setText(""); 
+	    	    }
 	        }
 	    });
-	    
-	    return mScene;
-	}
-	
-    @Override
-	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
 
-			switch (pSceneTouchEvent.getAction()) {
-	        case MotionEvent.ACTION_DOWN:
-	    		Log("Down");
-	    	    mSheep  = addSprite(mScene, 250, 1000, mShieldRegion);   
-	        break;
-	        case MotionEvent.ACTION_MOVE: 
-	    		Log("Move");
-	        break;
-	        case MotionEvent.ACTION_UP:
-	    		Log("Up");
-
-                mScene.attachChild(mSheep);	  
-                mTargetSprites.add(mSheep);  
-	            
-            	final Handler handler = new Handler();
-    		    handler.postDelayed(new Runnable() { 
-    		    	@Override
-    		    	public void run() {
-    	                mTargetSprites.remove(mSheep);
-    		    		mSheep.detachSelf();  
-    		    		Log.i("DELAY", "-------------------------");
-    		    	}
-    		    }, 1000);
-	        break;
-	    }   
-	    return true;
-	}
-	
-	public void getDisplayInfo(){
-		
-		Display display = getWindowManager().getDefaultDisplay();
-		Point size = new Point();
-		display.getSize(size);
-		
-		CAMERA_WIDTH = size.x;
-		CAMERA_HEIGHT = size.y;
-		
-		mDisplayWidth = size.x;
-		mDisplayHeight = size.y;
-
+		pOnPopulateSceneCallback.onPopulateSceneFinished();
 	}
 
 	
-	public void gameRunning(){
-		
-		newAnimation();
-		
-	}
+	 @Override
+	 public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
 
-	public void newAnimation(){
-		
-		
-		final Handler h = new Handler();
-		final int delay = mRandom.nextInt(5000 - 2000) + 2000; //milliseconds 
+				switch (pSceneTouchEvent.getAction()) {
+		        case MotionEvent.ACTION_DOWN:
+		        	if(mShieldSprites.size() <= 2) mShieldSprites.add(addShieldSprite(mScene, pSceneTouchEvent.getX(), pSceneTouchEvent.getY(), mShieldRegion)); 
+		    		Log("Down");
+		        break;
+		        case MotionEvent.ACTION_MOVE: 
+		    		Log("Move");
+		        break;
+		        case MotionEvent.ACTION_UP:
+		    		Log("Up");
+	  
+		            
+		    		((Activity) context).runOnUiThread(new Runnable() {
+		    			  public void run() {
+		  	            	final Handler handler = new Handler();
+			    		    handler.postDelayed(new Runnable() { 
+			    		    	@Override
+			    		    	public void run() {
 
-		h.postDelayed(runnable = new Runnable(){
-		    public void run(){
-		    	if(alive){
-		    		newSprite();
-		    		h.postDelayed(this, delay);		    		
-		    	}
-		    	else if (!alive && once){
-		    		once = false;
-		    		stop();
-		    		//Removes all "in action" bullets
-		    		for(Shape bullet : mBulletSprites){
-		    			bullet.detachSelf();
-		    		}
-		    	}
-		    }
-		    
-		    public void stop(){
-		    	
-		    	onStop(h, runnable);
+			    		    		mTrashSprites.add(mShieldSprites.remove(1));
+			    		    		Log.i("DELAY", "-------------------------");
+			    		    	}
+			    		    }, 400);
+		    			  }
+		    		});
+
+		        break;
+		    }   
+		    return true;
+		}
+		
+		public void getDisplayInfo(){
+			
+			Display display = getWindowManager().getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			
+			CAMERA_WIDTH = size.x;
+			CAMERA_HEIGHT = size.y;
+			 
+			Log("width: " +CAMERA_WIDTH);
+			Log("height: "+CAMERA_HEIGHT);
+			
+			mDisplayWidth = size.x;
+			mDisplayHeight = size.y;
+
+		}
+
+		
+		public void gameRunning(){
+
+			bulletTimer();
+			
+		}
+		
+		
+		public void deadMenu(){
+			
+			((Activity) context).runOnUiThread(new Runnable() {
+  			  public void run() {
 		    	//Creates the popup window
 		    	gameOver = new Dialog(context);
 	          	gameOver.setContentView(R.layout.game_over_view);
@@ -330,94 +300,121 @@ public class ActivityGame extends BaseGameActivity implements IOnSceneTouchListe
 						
 					}
 				});
-		    }
-		}, delay);		
-		
-	}
-	protected void onStop(Handler handler, Runnable runnable) {
-		//To stop the handler (the timer)
-		super.onStop();
-		handler.removeCallbacks(runnable);
-	}
-	
-	public void newSprite(){
+  			  }
+  			});
+		}
 
-		 mBulletSprites.add(addAnimatedSprite(mScene, -10, -10, 10, mBulletRegion));
-		 
-	}
-	
-	public Integer[] RandomizeAnimation(){
-		
-		int randomY = 0;
-		int randomX = 0;
-		
-		int randomPosition = mRandom.nextInt(4);
-		
-		switch (randomPosition){
-			case 0: 
-				randomY = mRandom.nextInt(mDisplayHeight - 0) + 0;
-				randomX = -20;
-				break;
-			case 1:
-				randomY = -20;
-				randomX = mRandom.nextInt(mDisplayWidth - 0) + 0;
-				break;
-			case 2:
-				randomY = mRandom.nextInt(mDisplayHeight - 0) + 0;
-				randomX = mDisplayWidth + 20;
-				break;
-			case 3:
-				randomY = mDisplayHeight + 20;
-				randomX = mRandom.nextInt(mDisplayWidth - 0) + 0;
-				break;
+		public void bulletTimer(){
+			
+			final Handler h = new Handler();
+			final int delay = mRandom.nextInt(1500 - 200) + 200; //milliseconds 
+
+			h.postDelayed(runnable = new Runnable(){
+			    public void run(){
+			    	if(alive){
+			    		newSprite();
+			    		h.postDelayed(this, delay);		    		
+			    	}
+			    }
+			}, delay);		
+			
 		}
 		
-		Integer[] list = new Integer[] {randomX,450,randomY,1100};
+		protected void onStop(Handler handler, Runnable runnable) {
+			//To stop the handler (the timer)
+			super.onStop();
+			handler.removeCallbacks(runnable);
+		}
 		
-		return list;
-	}
-	
-	private void Log(String log){
-		Log.i("ActivityGame", log);
-	}
-	
-	@Override
-	public void onBackPressed(){
-		Log.i("onback","pressed");
-		startActivity(new Intent(this, ActivityMenu.class));
-	}
+		public void newSprite(){
 
-	
-	private PixelPerfectAnimatedSprite addAnimatedSprite(final Scene scene, final int x, final int y, final int speed, final PixelPerfectTiledTextureRegion region){
-	   
-		PixelPerfectAnimatedSprite sprite = new PixelPerfectAnimatedSprite(x,y,region){ };
-	    sprite.animate(speed, true);
-	    scene.attachChild(sprite);
-	    scene.registerTouchArea(sprite);
-
-		Integer[] coordinates = RandomizeAnimation();
-		float[] objCenterPos = new float[2];
-		objCenterPos = mSheep.getSceneCenterCoordinates();
-		org.anddev.andengine.entity.modifier.PathModifier.Path path = new org.anddev.andengine.entity.modifier.PathModifier.Path(2).to(coordinates[0], coordinates[2]).to(objCenterPos[0], objCenterPos[1]);
-		sprite.registerEntityModifier(new LoopEntityModifier(new PathModifier(3, path)));
+			mBulletSprites.add(addBulletSprite(mScene, -10, -10, 10, mBulletRegion));
+			 
+		}
 		
-	    return sprite;
-	} 
-	
-	private PixelPerfectSprite addSprite(final Scene scene, final int x, final int y, final PixelPerfectTextureRegion region){
-	    PixelPerfectSprite sprite = new PixelPerfectSprite(x,y,region);
-	    scene.attachChild(sprite);
-	    scene.registerTouchArea(sprite);
-	    return sprite;
-	}
-	
-	
-	@Override
-	public void onLoadComplete() {
-
-	    //run game
-		gameRunning();
+		public Integer[] RandomizeAnimation(){
+			
+			int randomY = 0;
+			int randomX = 0;
+			
+			int randomPosition = mRandom.nextInt(4);
+			
+			switch (randomPosition){
+				case 0: 
+					randomY = mRandom.nextInt(mDisplayHeight - 0) + 0;
+					randomX = -20;
+					break;
+				case 1:
+					randomY = -20;
+					randomX = mRandom.nextInt(mDisplayWidth - 0) + 0;
+					break;
+				case 2:
+					randomY = mRandom.nextInt(mDisplayHeight - 0) + 0;
+					randomX = mDisplayWidth + 20;
+					break;
+				case 3:
+					randomY = mDisplayHeight + 20;
+					randomX = mRandom.nextInt(mDisplayWidth - 0) + 0;
+					break;
+			}
+			
+			Integer[] list = new Integer[] {randomX,450,randomY,1100};
+			
+			return list;
+		}
 		
-	}
+		private void Log(String log){
+			Log.i("ActivityGame", log);
+		}
+		
+		@Override
+		public void onBackPressed(){
+			Log.i("onback","pressed");
+			startActivity(new Intent(this, ActivityMenu.class));
+		}
 
+		
+		private PixelPerfectAnimatedSprite addBulletSprite(final Scene scene, final int x, final int y, final int speed, final PixelPerfectTiledTextureRegion region){
+		   
+			PixelPerfectAnimatedSprite sprite = new PixelPerfectAnimatedSprite(x,y,region, VBOmanager);
+		    sprite.animate(speed, true);
+
+			Integer[] coordinates = RandomizeAnimation();
+			float[] objCenterPos = new float[2];
+			objCenterPos = mSheep.getSceneCenterCoordinates();
+			org.andengine.entity.modifier.PathModifier.Path path = new org.andengine.entity.modifier.PathModifier.Path(2).to(coordinates[0], coordinates[2]).to(objCenterPos[0], objCenterPos[1]);
+			sprite.registerEntityModifier((org.andengine.entity.modifier.IEntityModifier) new LoopEntityModifier(new PathModifier((float) 1, path)));
+			
+		    scene.attachChild((IEntity) sprite);
+
+		    return sprite;
+		} 
+		
+		private PixelPerfectAnimatedSprite addSheepSprite(final Scene scene, final int x, final int y, final PixelPerfectTiledTextureRegion region){
+
+			PixelPerfectAnimatedSprite sprite = new PixelPerfectAnimatedSprite(x,y,region, VBOmanager);
+		    scene.attachChild((IEntity) sprite);
+		    return sprite;
+		    
+		}
+		
+		
+		private PixelPerfectAnimatedSprite addShieldSprite(final Scene scene, final float x, final float y, final PixelPerfectTiledTextureRegion region){
+		   
+			PixelPerfectAnimatedSprite sprite = new PixelPerfectAnimatedSprite(x,y,region, VBOmanager) ;
+
+		    double deltaX = mSheep.getSceneCenterCoordinates()[0] - x;
+		    double deltaY = y  - mSheep.getSceneCenterCoordinates()[1];
+		    
+		    Log(deltaX + "");
+		    Log(deltaY + "");
+		    float angle = (float) (Math.atan(deltaX / Math.abs(deltaY)) * 180 / Math.PI);
+		   
+		    if(deltaY < 0) angle = angle + 180;
+		    if(deltaY > 0) angle = angle * -1;
+		
+		    sprite.setRotation(angle);
+		    scene.attachChild((IEntity) sprite);
+		    return sprite;
+		}
 }
